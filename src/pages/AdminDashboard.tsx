@@ -508,8 +508,8 @@ export default function AdminDashboard() {
         />
         <StatCard
           title={t('adminDashboard.stats.activeSubscriptions')}
-          value={stats?.subscriptions.active || 0}
-          subtitle={`${t('adminDashboard.stats.total')}: ${stats?.subscriptions.total || 0}`}
+          value={stats?.subscriptions?.active || 0}
+          subtitle={`${t('adminDashboard.stats.total')}: ${stats?.subscriptions?.total || 0}`}
           icon={<SparklesIcon />}
           color="accent"
         />
@@ -651,7 +651,7 @@ export default function AdminDashboard() {
                   {t('adminDashboard.subscriptions.active')}
                 </div>
                 <div className="text-2xl font-bold text-success-400">
-                  {stats?.subscriptions.active || 0}
+                  {stats?.subscriptions?.active || 0}
                 </div>
               </div>
               <div className="rounded-lg bg-dark-900/50 p-4">
@@ -659,7 +659,7 @@ export default function AdminDashboard() {
                   {t('adminDashboard.subscriptions.trial')}
                 </div>
                 <div className="text-2xl font-bold text-warning-400">
-                  {stats?.subscriptions.trial || 0}
+                  {stats?.subscriptions?.trial || 0}
                 </div>
               </div>
               <div className="rounded-lg bg-dark-900/50 p-4">
@@ -667,7 +667,7 @@ export default function AdminDashboard() {
                   {t('adminDashboard.subscriptions.paid')}
                 </div>
                 <div className="text-2xl font-bold text-accent-400">
-                  {stats?.subscriptions.paid || 0}
+                  {stats?.subscriptions?.paid || 0}
                 </div>
               </div>
               <div className="rounded-lg bg-dark-900/50 p-4">
@@ -675,7 +675,7 @@ export default function AdminDashboard() {
                   {t('adminDashboard.subscriptions.expired')}
                 </div>
                 <div className="text-2xl font-bold text-error-400">
-                  {stats?.subscriptions.expired || 0}
+                  {stats?.subscriptions?.expired || 0}
                 </div>
               </div>
             </div>
@@ -687,7 +687,7 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-3 gap-3">
                 <div className="text-center">
                   <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_today || 0}
+                    {stats?.subscriptions?.purchased_today || 0}
                   </div>
                   <div className="text-xs text-dark-500">
                     {t('adminDashboard.subscriptions.today')}
@@ -695,7 +695,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-center">
                   <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_week || 0}
+                    {stats?.subscriptions?.purchased_week || 0}
                   </div>
                   <div className="text-xs text-dark-500">
                     {t('adminDashboard.subscriptions.week')}
@@ -703,7 +703,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-center">
                   <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_month || 0}
+                    {stats?.subscriptions?.purchased_month || 0}
                   </div>
                   <div className="text-xs text-dark-500">
                     {t('adminDashboard.subscriptions.month')}
@@ -712,14 +712,14 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {stats?.subscriptions.trial_to_paid_conversion !== undefined && (
+            {stats?.subscriptions?.trial_to_paid_conversion !== undefined && (
               <div className="rounded-lg border border-accent-500/20 bg-accent-500/10 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-dark-300">
                     {t('adminDashboard.subscriptions.conversion')}
                   </span>
                   <span className="text-lg font-bold text-accent-400">
-                    {stats.subscriptions.trial_to_paid_conversion.toFixed(1)}%
+                    {stats?.subscriptions?.trial_to_paid_conversion.toFixed(1)}%
                   </span>
                 </div>
               </div>

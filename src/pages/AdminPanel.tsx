@@ -644,9 +644,9 @@ const StatsBar = memo(function StatsBar({ systemInfo, dashboardStats, loading }:
 
   const stats = useMemo(() => {
     const uptime = systemInfo?.uptime_seconds ?? 0;
-    const trial = dashboardStats?.subscriptions.trial ?? 0;
-    const paid = dashboardStats?.subscriptions.paid ?? 0;
-    const purchasedToday = dashboardStats?.subscriptions.purchased_today ?? 0;
+    const trial = dashboardStats?.subscriptions?.trial ?? 0;
+    const paid = dashboardStats?.subscriptions?.paid ?? 0;
+    const purchasedToday = dashboardStats?.subscriptions?.purchased_today ?? 0;
 
     return [
       {
@@ -970,16 +970,16 @@ export default function AdminPanel() {
             {
               icon: <StatTrialIcon />,
               label: t('admin.panel.statsTrials'),
-              value: dashboardStats?.subscriptions.trial?.toLocaleString() ?? '--',
+              value: dashboardStats?.subscriptions?.trial?.toLocaleString() ?? '--',
               cls: 'text-warning-400',
             },
             {
               icon: <StatPaidIcon />,
               label: t('admin.panel.statsPaid'),
-              value: dashboardStats?.subscriptions.paid?.toLocaleString() ?? '--',
+              value: dashboardStats?.subscriptions?.paid?.toLocaleString() ?? '--',
               delta:
-                (dashboardStats?.subscriptions.purchased_today ?? 0) > 0
-                  ? `+${dashboardStats?.subscriptions.purchased_today}`
+                (dashboardStats?.subscriptions?.purchased_today ?? 0) > 0
+                  ? `+${dashboardStats?.subscriptions?.purchased_today}`
                   : undefined,
               cls: 'text-success-400',
             },

@@ -245,7 +245,7 @@ export interface TariffStats {
 
 export interface DashboardStats {
   nodes: NodesOverview;
-  subscriptions: SubscriptionStats;
+  subscriptions?: SubscriptionStats;
   financial: FinancialStats;
   servers: ServerStats;
   revenue_chart: RevenueData[];
