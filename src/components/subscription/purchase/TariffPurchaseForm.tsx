@@ -230,7 +230,7 @@ export function TariffPurchaseForm({
                   const displayPrice = promoPeriod.price;
                   const displayPerMonth =
                     displayPrice !== period.price_kopeks
-                      ? Math.round(displayPrice / Math.max(1, period.days / 30))
+                      ? Math.round((displayPrice * 30) / period.days)
                       : period.price_per_month_kopeks;
 
                   return (
