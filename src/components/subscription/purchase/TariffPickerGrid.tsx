@@ -107,7 +107,7 @@ export function TariffPickerGrid({
             </p>
             <button
               onClick={() => navigate('/subscriptions')}
-              className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+              className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600"
             >
               {t('subscription.backToList', 'Мои подписки')}
             </button>
@@ -137,6 +137,13 @@ export function TariffPickerGrid({
               purchaseOptions &&
               'subscription_is_expired' in purchaseOptions &&
               purchaseOptions.subscription_is_expired === true;
+            // Free (0₽) source tariff: the backend blocks the prorated switch
+            // (free_tariff_cannot_switch) — offer the purchase flow instead.
+            const isOnFreeTariff =
+              isTariffsMode &&
+              purchaseOptions &&
+              'subscription_on_free_tariff' in purchaseOptions &&
+              purchaseOptions.subscription_on_free_tariff === true;
             const canSwitch =
               !isMultiTariff &&
               subscription &&
@@ -144,6 +151,7 @@ export function TariffPickerGrid({
               !isCurrentTariff &&
               !subscription.is_trial &&
               !isSubscriptionExpired &&
+              !isOnFreeTariff &&
               (subscription.is_active || subscription.is_limited);
             const isLegacySubscription =
               subscription && !subscription.is_trial && !subscription.tariff_id;

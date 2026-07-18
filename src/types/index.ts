@@ -364,6 +364,9 @@ export interface TariffsPurchaseOptions {
   // New fields for expired subscription handling
   subscription_status?: string;
   subscription_is_expired?: boolean;
+  // Free (0₽) source tariff: switch is blocked (free days must reset),
+  // tariff cards must offer the purchase flow instead of the prorated switch
+  subscription_on_free_tariff?: boolean;
   has_subscription?: boolean;
   // Multi-tariff: all available tariffs already purchased
   all_tariffs_purchased?: boolean;
@@ -448,6 +451,7 @@ export interface PaymentMethod {
   max_amount_kopeks: number;
   is_available: boolean;
   options?: PaymentMethodOption[] | null;
+  quick_amounts?: number[];
   // Если true — после получения payment_url кабинет сразу делает
   // window.location.href вместо показа панели с кнопкой "Открыть".
   open_url_direct?: boolean;
@@ -687,6 +691,8 @@ export interface PaymentMethodConfig {
   default_display_name: string;
   sub_options: Record<string, boolean> | null;
   available_sub_options: PaymentMethodSubOptionInfo[] | null;
+  quick_amounts: number[] | null;
+  default_quick_amounts: number[];
   min_amount_kopeks: number | null;
   max_amount_kopeks: number | null;
   default_min_amount_kopeks: number;

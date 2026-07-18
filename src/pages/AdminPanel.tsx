@@ -188,6 +188,12 @@ const sections: AdminSection[] = [
         permission: 'promocodes:read',
       },
       {
+        name: 'admin.nav.coupons',
+        icon: 'ticket',
+        to: '/admin/coupons',
+        permission: 'coupons:read',
+      },
+      {
         name: 'admin.nav.promoGroups',
         icon: 'percent',
         to: '/admin/promo-groups',
@@ -301,6 +307,12 @@ const sections: AdminSection[] = [
         name: 'admin.nav.infoPages',
         icon: 'file-text',
         to: '/admin/info-pages',
+        permission: 'info_pages:read',
+      },
+      {
+        name: 'admin.nav.legalPages',
+        icon: 'file-text',
+        to: '/admin/legal-pages',
         permission: 'info_pages:read',
       },
       {

@@ -39,6 +39,7 @@ import {
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
 import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
+import { getApiErrorMessage } from '../../utils/api-error';
 
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   <PiCaretDown className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -72,7 +73,7 @@ function MaxPerRowSelector({ value, onChange }: MaxPerRowSelectorProps) {
           onClick={() => onChange(n)}
           className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
             value === n
-              ? 'bg-accent-500 text-white'
+              ? 'bg-accent-500 text-on-accent'
               : 'bg-dark-700/50 text-dark-400 hover:bg-dark-600 hover:text-dark-300'
           }`}
         >
@@ -511,9 +512,7 @@ export function MenuEditorTab() {
       queryClient.setQueryData(['menu-layout'], data);
     },
     onError: (err: unknown) => {
-      const error = err as { response?: { data?: { detail?: string } } };
-      const detail = error.response?.data?.detail;
-      notify.error(detail || t('common.error'));
+      notify.error(getApiErrorMessage(err, t('common.error')));
     },
   });
 
@@ -788,7 +787,7 @@ export function MenuEditorTab() {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </button>

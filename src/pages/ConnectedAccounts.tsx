@@ -11,6 +11,7 @@ import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import ProviderIcon from '../components/ProviderIcon';
 import { LINK_OAUTH_STATE_KEY, LINK_OAUTH_PROVIDER_KEY, getErrorDetail } from '../utils/oauth';
+import { getApiErrorMessage } from '../utils/api-error';
 import { getTelegramInitData } from '../hooks/useTelegramSDK';
 import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
 import { useAuthStore } from '../store/auth';
@@ -240,13 +241,15 @@ function TelegramLinkWidget() {
   // Script failed to load - show unavailable message with bot link
   if (scriptFailed) {
     return (
-      <div className="flex flex-col items-center gap-1.5">
-        <p className="text-xs text-dark-400">{t('profile.accounts.telegramLinkUnavailable')}</p>
+      <div className="flex max-w-[200px] flex-col items-center gap-1.5">
+        <p className="break-words text-center text-xs text-dark-400">
+          {t('profile.accounts.telegramLinkUnavailable')}
+        </p>
         <a
           href={`https://t.me/${botUsername}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-accent-400 transition-colors hover:text-accent-300"
+          className="break-all text-sm text-accent-400 transition-colors hover:text-accent-300"
         >
           @{botUsername}
         </a>
@@ -420,16 +423,16 @@ export default function ConnectedAccounts() {
       // Note: auth user lives in the zustand store, not in React Query —
       // the explicit setUser above IS the refresh. No ['user'] query exists.
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
       // The email belongs to another account and merging it requires proving
       // ownership: the backend asks for THAT account's password (account-takeover
       // fix). Guide the user to enter it rather than showing a dead-end error.
-      if (detail?.includes('merge')) {
+      if (detail.includes('merge')) {
         setEmailError(t('profile.emailMergePasswordRequired'));
-      } else if (detail?.includes('already registered')) {
+      } else if (detail.includes('already registered')) {
         setEmailError(t('profile.emailAlreadyRegistered'));
-      } else if (detail?.includes('already have a verified email')) {
+      } else if (detail.includes('already have a verified email')) {
         setEmailError(t('profile.alreadyHaveEmail'));
       } else {
         setEmailError(detail || t('common.error'));
@@ -637,7 +640,11 @@ export default function ConnectedAccounts() {
   };
 
   return (
+    // key: remount the container when loading resolves — stagger orchestration
+    // runs once on mount, so provider cards arriving from the API later would
+    // otherwise stay stuck at their initial variant (opacity 0) after a hard refresh
     <motion.div
+      key={isLoading ? 'loading' : 'ready'}
       className="space-y-6"
       variants={staggerContainer}
       initial="initial"

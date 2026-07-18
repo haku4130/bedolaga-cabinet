@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { brandingApi } from '../../api/branding';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { CheckIcon, CloseIcon, PencilIcon } from './icons';
 
 export function AnalyticsTab() {
@@ -31,8 +32,7 @@ export function AnalyticsTab() {
       setError(null);
     },
     onError: (err: unknown) => {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail || t('common.error'));
+      setError(getApiErrorMessage(err, t('common.error')));
     },
   });
 
@@ -114,7 +114,7 @@ export function AnalyticsTab() {
               <button
                 onClick={handleSaveYandex}
                 disabled={updateMutation.isPending}
-                className="rounded-xl bg-accent-500 px-4 py-2.5 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                className="rounded-xl bg-accent-500 px-4 py-2.5 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
               >
                 <CheckIcon />
               </button>
@@ -253,7 +253,7 @@ export function AnalyticsTab() {
                 <button
                   onClick={handleSaveGoogleId}
                   disabled={updateMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2.5 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="rounded-xl bg-accent-500 px-4 py-2.5 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
@@ -307,7 +307,7 @@ export function AnalyticsTab() {
                 <button
                   onClick={handleSaveGoogleLabel}
                   disabled={updateMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2.5 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="rounded-xl bg-accent-500 px-4 py-2.5 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>

@@ -31,6 +31,7 @@ import {
   ServiceUnavailableScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { BackgroundHost } from './components/backgrounds/BackgroundHost';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
@@ -42,6 +43,7 @@ import TelegramRedirect from './pages/TelegramRedirect';
 import DeepLinkRedirect from './pages/DeepLinkRedirect';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
+import PublicLegal from './pages/PublicLegal';
 import OAuthCallback from './pages/OAuthCallback';
 
 // Dashboard - load eagerly (default route, LCP-critical)
@@ -93,6 +95,10 @@ const AdminBroadcasts = lazyWithRetry(() => import('./pages/AdminBroadcasts'));
 const AdminBroadcastCreate = lazyWithRetry(() => import('./pages/AdminBroadcastCreate'));
 const AdminPromocodes = lazyWithRetry(() => import('./pages/AdminPromocodes'));
 const AdminPromocodeCreate = lazyWithRetry(() => import('./pages/AdminPromocodeCreate'));
+const AdminCoupons = lazyWithRetry(() => import('./pages/AdminCoupons'));
+const AdminCouponCreate = lazyWithRetry(() => import('./pages/AdminCouponCreate'));
+const AdminCouponDetail = lazyWithRetry(() => import('./pages/AdminCouponDetail'));
+const CouponStatus = lazyWithRetry(() => import('./pages/CouponStatus'));
 const AdminPromocodeStats = lazyWithRetry(() => import('./pages/AdminPromocodeStats'));
 const AdminPromoGroups = lazyWithRetry(() => import('./pages/AdminPromoGroups'));
 const AdminPromoGroupCreate = lazyWithRetry(() => import('./pages/AdminPromoGroupCreate'));
@@ -135,7 +141,6 @@ const AdminBroadcastDetail = lazyWithRetry(() => import('./pages/AdminBroadcastD
 const AdminPinnedMessages = lazyWithRetry(() => import('./pages/AdminPinnedMessages'));
 const AdminPinnedMessageCreate = lazyWithRetry(() => import('./pages/AdminPinnedMessageCreate'));
 const AdminChannelSubscriptions = lazyWithRetry(() => import('./pages/AdminChannelSubscriptions'));
-const AdminEmailTemplatePreview = lazyWithRetry(() => import('./pages/AdminEmailTemplatePreview'));
 const AdminRoles = lazyWithRetry(() => import('./pages/AdminRoles'));
 const AdminRoleEdit = lazyWithRetry(() => import('./pages/AdminRoleEdit'));
 const AdminRoleAssign = lazyWithRetry(() => import('./pages/AdminRoleAssign'));
@@ -156,6 +161,7 @@ const AdminNewsCreate = lazyWithRetry(() => import('./pages/AdminNewsCreate'));
 const InfoPageView = lazyWithRetry(() => import('./pages/InfoPageView'));
 const AdminInfoPages = lazyWithRetry(() => import('./pages/AdminInfoPages'));
 const AdminInfoPageEditor = lazyWithRetry(() => import('./pages/AdminInfoPageEditor'));
+const AdminLegalPages = lazyWithRetry(() => import('./pages/AdminLegalPages'));
 
 function ProtectedRoute({
   children,
@@ -254,6 +260,8 @@ function App() {
 
   return (
     <>
+      {/* Живёт над <Routes>: анимация фона не перезапускается при навигации */}
+      <BackgroundHost />
       <BlockingOverlay />
       <Routes>
         {/* Public routes */}
@@ -266,6 +274,9 @@ function App() {
         <Route path="/auth/oauth/callback" element={<OAuthCallback />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/offer" element={<PublicLegal doc="offer" />} />
+        <Route path="/privacy" element={<PublicLegal doc="privacy" />} />
+        <Route path="/recurrent-payments" element={<PublicLegal doc="recurrent" />} />
         <Route
           path="/merge/:mergeToken"
           element={
@@ -287,6 +298,14 @@ function App() {
           element={
             <LazyPage>
               <GiftClaim />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/coupon/:token"
+          element={
+            <LazyPage>
+              <CouponStatus />
             </LazyPage>
           }
         />
@@ -400,6 +419,18 @@ function App() {
         />
         <Route
           path="/balance/top-up/result"
+          element={
+            <ProtectedRoute withLayout={false}>
+              <LazyPage>
+                <TopUpResult />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        {/* Path-based method variant: some providers (Lava) reject return URLs that carry a
+            query string, so the method is encoded in the path instead of ?method=. */}
+        <Route
+          path="/balance/top-up/result/:method"
           element={
             <ProtectedRoute withLayout={false}>
               <LazyPage>
@@ -620,6 +651,19 @@ function App() {
             </PermissionRoute>
           }
         />
+        {/* Deep-link target for admin ticket notification buttons (bot issue #2988):
+            opens a specific ticket directly. Static "/settings" above out-ranks
+            this dynamic segment in react-router, so there is no conflict. */}
+        <Route
+          path="/admin/tickets/:ticketId"
+          element={
+            <PermissionRoute permission="tickets:read">
+              <LazyPage>
+                <AdminTickets />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
         <Route
           path="/admin/settings"
           element={
@@ -806,6 +850,36 @@ function App() {
             <PermissionRoute permission="promocodes:read">
               <LazyPage>
                 <AdminPromocodeCreate />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons"
+          element={
+            <PermissionRoute permission="coupons:read">
+              <LazyPage>
+                <AdminCoupons />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons/create"
+          element={
+            <PermissionRoute permission="coupons:create">
+              <LazyPage>
+                <AdminCouponCreate />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons/:id"
+          element={
+            <PermissionRoute permission="coupons:read">
+              <LazyPage>
+                <AdminCouponDetail />
               </LazyPage>
             </PermissionRoute>
           }
@@ -1200,17 +1274,6 @@ function App() {
             </PermissionRoute>
           }
         />
-        <Route
-          path="/admin/email-templates/preview/:type/:lang"
-          element={
-            <PermissionRoute permission="email_templates:read">
-              <LazyPage>
-                <AdminEmailTemplatePreview />
-              </LazyPage>
-            </PermissionRoute>
-          }
-        />
-
         {/* RBAC routes */}
         <Route
           path="/admin/roles"
@@ -1341,6 +1404,16 @@ function App() {
             <PermissionRoute permission="info_pages:edit">
               <LazyPage>
                 <AdminInfoPageEditor />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/legal-pages"
+          element={
+            <PermissionRoute permission="info_pages:read">
+              <LazyPage>
+                <AdminLegalPages />
               </LazyPage>
             </PermissionRoute>
           }

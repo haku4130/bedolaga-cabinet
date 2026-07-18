@@ -8,6 +8,7 @@ import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { SettingsIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
+import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
@@ -113,11 +114,19 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (isHappCryptolinkMode(connectionLink?.connect_mode) && qrConnectionUrl) {
-        // In HAPP cryptolink mode always open the resolved happ://crypt... URL.
-        resolved = qrConnectionUrl;
-      } else if (hasTemplates(resolved)) {
+      if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
+      }
+      // In HAPP cryptolink mode keep hiding the plain subscription link: force the
+      // happ://crypt... URL only when the button fell back to it or its template
+      // could not be resolved. An explicit link from the panel's Subpage config
+      // (e.g. happ://add/...) wins — admins expect Subpage edits to apply here.
+      if (
+        isHappCryptolinkMode(connectionLink?.connect_mode) &&
+        qrConnectionUrl &&
+        (!resolved || resolved === appConfig?.subscriptionUrl || hasTemplates(resolved))
+      ) {
+        resolved = qrConnectionUrl;
       }
       const isHttpUrl = /^https?:\/\//i.test(resolved);
       const finalUrlForTelegram = isHttpUrl
@@ -133,10 +142,20 @@ export default function Connection() {
         }
       }
 
-      // In regular browsers open deeplink directly (without intermediate redirect page).
-      window.location.href = resolved;
+      // In regular browsers open the deeplink directly. openAppScheme uses a contained
+      // iframe for custom schemes so an unresolved scheme doesn't paint a full-page
+      // net::ERR_UNKNOWN_URL_SCHEME (Android) / silently fail (iOS); http(s) links
+      // still navigate normally. (Telegram bug #654272.)
+      openAppScheme(resolved);
     },
-    [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
+    [
+      isTelegramWebApp,
+      i18n.language,
+      resolveUrl,
+      connectionLink?.connect_mode,
+      qrConnectionUrl,
+      appConfig?.subscriptionUrl,
+    ],
   );
 
   // Check if any platform has configured apps
@@ -213,6 +232,7 @@ export default function Connection() {
       isTelegramWebApp={isTelegramWebApp}
       onGoBack={handleGoBack}
       onOpenQR={handleOpenQR}
+      username={user?.username ?? undefined}
     />
   );
 }
