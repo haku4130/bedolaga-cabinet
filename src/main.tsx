@@ -43,7 +43,14 @@ installEncodingSurrogateGuard();
 // See: https://github.com/Telegram-Mini-Apps/tma.js/issues/683
 if (typeof (Object as { hasOwn?: unknown }).hasOwn !== 'function') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (Object as any).hasOwn = (obj: object, prop: PropertyKey): boolean => Object.hasOwn(obj, prop);
+  // Блочное тело и biome-ignore — не стиль, а защита: автофикс
+  // lint/suspicious/noPrototypeBuiltins переписывает вызов в Object.hasOwn(obj, prop),
+  // то есть в вызов той самой функции, которую этот полифил создаёт. Получается
+  // бесконечная рекурсия ровно на тех устройствах, ради которых полифил и написан.
+  (Object as any).hasOwn = (obj: object, prop: PropertyKey): boolean => {
+    // biome-ignore lint/suspicious/noPrototypeBuiltins: тело полифила Object.hasOwn
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+  };
 }
 
 // Only initialize Telegram SDK when running inside Telegram
