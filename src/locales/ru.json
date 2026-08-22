@@ -119,6 +119,18 @@
       "insufficientTitle": "Недостаточно средств",
       "insufficientMessage": "Для продления нужно {{required}} {{currency}}, на балансе {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "Платёж по СБП подтверждён",
+      "confirmedMessage": "Списано {{amount}} {{currency}}",
+      "failedTitle": "Ошибка платежа по СБП",
+      "failedMessage": "Не удалось списать платёж по СБП",
+      "pastDueTitle": "Просрочен платёж по СБП",
+      "pastDueMessage": "Платёж по СБП просрочен. Проверьте приложение банка.",
+      "cancelledTitle": "Автоплатёж по СБП отключён",
+      "cancelledMessage": "Автоплатёж по СБП был отключён",
+      "activatedTitle": "Автоплатёж по СБП подключён",
+      "activatedMessage": "Автоплатёж по СБП успешно подключён"
+    },
     "account": {
       "bannedTitle": "Аккаунт заблокирован",
       "bannedMessage": "Ваш аккаунт был заблокирован",
@@ -192,11 +204,15 @@
     "telegramRetryFailed": "Авторизация не удалась. Закройте приложение и откройте заново.",
     "telegramReopenHint": "Если проблема повторяется, закройте и откройте приложение заново",
     "telegramNotConfigured": "Telegram бот не настроен",
+    "botOutdated": "Версия бота несовместима с кабинетом. Обновите бота до v3.33.0 или новее.",
     "telegramUnavailable": "Вход через Telegram временно недоступен",
     "authenticating": "Авторизация...",
     "orOpenInApp": "Или откройте бота в приложении",
     "loginFailed": "Ошибка входа",
     "telegramWidgetBlocked": "Виджет входа через Telegram недоступен. Войдите через бота:",
+    "deepLinkIntro": "Подтвердите вход прямо в боте — без ввода номера телефона:",
+    "loginWithBot": "Войти через бота",
+    "backToWidget": "Назад к входу через виджет",
     "openBotToLogin": "Открыть бота для входа",
     "waitingForConfirmation": "Ожидание подтверждения...",
     "deepLinkExpired": "Ссылка истекла. Попробуйте снова.",
@@ -218,6 +234,10 @@
     "sendResetLink": "Отправить ссылку",
     "tooManyAttempts": "Слишком много попыток. Попробуйте позже",
     "verificationEmailNotice": "После регистрации на вашу почту будет отправлено письмо для подтверждения",
+    "legalConsentPrefix": "Я ознакомлен(а) с документом",
+    "legalConsentTitle": "Ещё один шаг",
+    "legalConsentSubtitle": "Чтобы создать аккаунт, подтвердите, что ознакомились с документами.",
+    "legalConsentContinue": "Продолжить",
     "checkEmail": "Проверьте почту",
     "verificationSent": "Мы отправили ссылку для подтверждения на:",
     "clickLinkToVerify": "Перейдите по ссылке в письме, чтобы подтвердить аккаунт и войти.",
@@ -253,6 +273,7 @@
   "dashboard": {
     "title": "Личный кабинет",
     "welcome": "Добро пожаловать, {{name}}!",
+    "welcomeNoName": "Добро пожаловать!",
     "yourSubscription": "Ваша подписка",
     "quickActions": "Быстрые действия",
     "viewSubscription": "Управление подпиской",
@@ -682,10 +703,71 @@
     },
     "allTariffsPurchased": "Все тарифы уже куплены",
     "autopay": "Автопродление",
+    "sbpRecurring": {
+      "title": "Автоплатёж по СБП",
+      "connect": "Подключить",
+      "confirmInBank": "Подтвердите в приложении банка",
+      "cancel": "Отключить",
+      "confirmCancel": "Отключить автоплатёж по СБП? Подписка больше не будет продлеваться автоматически через СБП.",
+      "cancelled": "Автоплатёж по СБП отключён",
+      "enableError": "Не удалось подключить автоплатёж по СБП",
+      "cancelError": "Не удалось отменить автоплатёж по СБП",
+      "statusPending": "Ожидает подтверждения в приложении банка",
+      "statusActive": "Активен",
+      "statusPastDue": "Платёж не прошёл — попробуйте снова",
+      "nextCharge": "следующее списание {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "ежедневно",
+        "week": "еженедельно",
+        "month": "ежемесячно",
+        "year": "ежегодно"
+      },
+      "autopayHint": "Подписка будет автоматически продлеваться через СБП без сохранённой карты",
+      "purchaseButton": "⚡ Оформить с автооплатой СБП",
+      "purchaseHint": "Первое списание подтверждает привязку в банке; продления списываются автоматически по каденсу тарифа."
+    },
+    "lavaRecurring": {
+      "title": "Автопродление Lava",
+      "connect": "Подключить",
+      "payFirst": "Оплатить первый счёт",
+      "cancel": "Отключить",
+      "confirmCancel": "Отключить автопродление Lava? Подписка больше не будет продлеваться автоматически.",
+      "cancelled": "Автопродление Lava отключено",
+      "enableError": "Не удалось подключить автопродление Lava",
+      "cancelError": "Не удалось отменить автопродление Lava",
+      "statusPending": "Ожидает оплаты первого счёта",
+      "statusActive": "Активно",
+      "statusPastDue": "Платёж не прошёл — попробуйте снова",
+      "nextCharge": "следующее списание {{date}}",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "{{amount}} ₽ раз в {{days}} дн.",
+      "period": {
+        "day": "ежедневно",
+        "week": "еженедельно",
+        "month": "ежемесячно",
+        "quarter": "раз в квартал",
+        "halfYear": "раз в полгода",
+        "year": "ежегодно"
+      },
+      "autopayHint": "Подписка будет автоматически продлеваться через Lava",
+      "purchaseButton": "⚡ Оформить с автооплатой Lava",
+      "purchaseHint": "Первое списание оплачивается по ссылке Lava; дальше продления списываются автоматически по периоду продукта."
+    },
     "backToList": "К списку подписок",
     "confirmDelete": "Удалить подписку?",
     "dailyAutoCharge": "Ежедневное списание",
     "defaultName": "Подписка",
+    "connectFooter": {
+      "connect": "Подключить устройство",
+      "full": "Все слоты заняты",
+      "connectedDevices": "Подключённые устройства",
+      "disconnect": "Отключить",
+      "addSlots": "Добавить слоты",
+      "limitExplained": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplainedNoTopup": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
+      "noTopupHint": "На тестовой подписке слоты докупить нельзя — освободите занятый или оформите платный тариф."
+    },
     "delete": "Удалить",
     "deleteTitle": "Удаление подписки",
     "get_config": "Получить конфиг",
@@ -775,6 +857,9 @@
       "jupiter": {
         "description": "Оплата СБП через Jupiter (FPGate P2P)"
       },
+      "cispay": {
+        "description": "Оплата картой или через СБП (cisPay)"
+      },
       "donut": {
         "description": "Оплата картой и СБП через Donut P2P"
       },
@@ -855,7 +940,10 @@
       "pageTitle": "Сохранённые карты",
       "backToBalance": "Назад",
       "empty": "Нет привязанных карт. Карта будет сохранена автоматически при следующем пополнении.",
-      "loadError": "Не удалось загрузить сохранённые карты. Попробуйте позже."
+      "loadError": "Не удалось загрузить сохранённые карты. Попробуйте позже.",
+      "sbpSection": "Автоплатёж по СБП",
+      "sbpBinding": "Привязка СБП",
+      "sbpUnlink": "Отключить автоплатёж по СБП"
     },
     "paymentReady": "Ссылка на оплату готова",
     "clickToOpenPayment": "Нажмите кнопку ниже, чтобы открыть страницу оплаты в новой вкладке",
@@ -1075,7 +1163,12 @@
     "contactSupport": "Для получения поддержки обратитесь к {{username}}",
     "contactUs": "Связаться с поддержкой",
     "create_ticket": "Создать тикет",
-    "writeButton": "Написать"
+    "writeButton": "Написать",
+    "errors": {
+      "alreadyOpenTicket": "У вас уже есть открытое обращение. Продолжите переписку в нём — новое можно создать после закрытия текущего.",
+      "createFailed": "Не удалось создать обращение. Попробуйте ещё раз.",
+      "replyFailed": "Не удалось отправить ответ. Попробуйте ещё раз."
+    }
   },
   "wheel": {
     "title": "Колесо удачи",
@@ -1520,7 +1613,10 @@
         "removeItem": "Удалить {{label}}",
         "clearAll": "Очистить все выбранные",
         "addScope": "Добавить область",
-        "maxReached": "Максимум {{max}} элементов"
+        "maxReached": "Максимум {{max}} элементов",
+        "fullNetwork": "Вся сеть",
+        "fullNetworkHint": "Показать граф целиком",
+        "removeFullNetwork": "Выключить режим полной сети"
       },
       "loading": "Загрузка графа...",
       "error": "Ошибка загрузки данных сети",
@@ -1633,7 +1729,7 @@
     },
     "paymentMethods": {
       "title": "Платёжные методы",
-      "description": "Настройка порядка и условий отображения",
+      "subtitle": "Настройка порядка и условий отображения",
       "enabled": "Вкл",
       "disabled": "Выкл",
       "notConfigured": "Не настроен",
@@ -1649,6 +1745,8 @@
       "openUrlDirectHint": "ВКЛ — ссылка оплаты открывается сразу, без промежуточной панели с кнопкой. ВЫКЛ — показывается кнопка «Открыть оплату». В Telegram ссылка в обоих случаях открывается во внешнем браузере (иначе оплата через банковское приложение/СБП не срабатывает), после оплаты — возврат на страницу результата. Stars/CryptoBot (t.me/-ссылки) всегда открываются нативно, флаг к ним не применяется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
+      "description": "Описание",
+      "descriptionHint": "Показывается под названием метода. Пусто — текст по умолчанию",
       "subOptions": "Варианты оплаты",
       "minAmount": "Мин. сумма (коп.)",
       "maxAmount": "Макс. сумма (коп.)",
@@ -1765,6 +1863,47 @@
           "users": "Пользователей"
         },
         "usersOnlineCount": "{{count}} онлайн"
+      },
+      "geoCheck": {
+        "title": "GeoCheck",
+        "start": "Запустить проверку",
+        "running": "Выполняется проверка геоданных",
+        "runningHint": "Нода проверяет соединение — обычно занимает до минуты.",
+        "changeRoute": "Изменить маршрут",
+        "rerun": "Проверить снова",
+        "reportAlt": "Отчёт GeoCheck для {{node}}",
+        "invalidIp": "Введите корректный адрес IPv4 или IPv6",
+        "invalidInterface": "Введите корректное имя интерфейса",
+        "fullscreen": "Во весь экран",
+        "exitFullscreen": "Выйти из полноэкранного режима",
+        "copyJson": "Скопировать отчёт в JSON",
+        "download": "Скачать SVG",
+        "zoomIn": "Увеличить",
+        "zoomOut": "Уменьшить",
+        "zoomReset": "Сбросить масштаб",
+        "mode": {
+          "legend": "Маршрут проверки",
+          "default": "По умолчанию",
+          "ip": "IP-адрес",
+          "interface": "Интерфейс"
+        },
+        "hint": {
+          "default": "Узел будет использовать исходящий маршрут по умолчанию.",
+          "ip": "Выберите один из IP-адресов узла или введите любой адрес.",
+          "interface": "Выберите один из интерфейсов узла или введите любое имя."
+        },
+        "placeholder": {
+          "default": "Автоматически"
+        },
+        "tab": {
+          "report": "Отчёт",
+          "json": "JSON"
+        },
+        "error": {
+          "title": "Проверка не удалась",
+          "timeout": "Нода не ответила вовремя. Попробуйте запустить проверку ещё раз.",
+          "generic": "Не удалось выполнить проверку."
+        }
       },
       "squads": {
         "synced": "Синхронизирован",
@@ -2193,6 +2332,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -2232,7 +2372,11 @@
         "sys_maintenance": "Обслуживание",
         "sys_backup": "Бэкап",
         "sys_version": "Версия",
-        "sys_logging": "Логи"
+        "sys_logging": "Логи",
+        "iface_info": "Правовые документы",
+        "iface_menu": "Кнопка меню",
+        "sys_cabinet": "Кабинет",
+        "sys_other": "Прочие настройки"
       },
       "presets": {
         "standard": "Стандарт",
@@ -2495,7 +2639,7 @@
         "Traffic Daily Check Enabled": "Ежедневная проверка",
         "Traffic Daily Check Time": "Время проверки",
         "Traffic Daily Threshold Gb": "Порог в день (ГБ)",
-        "Traffic Excluded User Uuids": "Исключённые UUID",
+        "Traffic Excluded User Ids": "Исключённые ID пользователей панели",
         "Traffic Fast Check Enabled": "Быстрая проверка",
         "Traffic Fast Check Interval Minutes": "Интервал (мин)",
         "Traffic Fast Check Threshold Gb": "Порог (ГБ)",
@@ -2688,6 +2832,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "categories": {
+        "CABINET": "Кабинет",
+        "INFO_PAGES": "Правовые документы и FAQ",
+        "MENU": "Кнопка меню",
         "PAYMENT": "Платежи",
         "PAYMENT_VERIFICATION": "Верификация платежей",
         "YOOKASSA": "YooKassa",
@@ -2746,7 +2893,15 @@
       "offlineConv": "Офлайн-конверсии",
       "apiKey": "API-ключ",
       "legalFooter": "Юридический футер",
-      "legalFooterDesc": "Ссылки на оферту, политику и рекуррентные платежи внизу страницы входа"
+      "legalFooterDesc": "Ссылки на оферту, политику и рекуррентные платежи внизу страницы входа",
+      "botStartVideo": "Видео стартового меню бота",
+      "botStartVideoDesc": "Бот прикрепит это видео к сообщению /start вместо картинки-логотипа. Файл разово отправляется в Telegram — храним только его идентификатор.",
+      "botStartVideoUpload": "Загрузить видео",
+      "botStartVideoReplace": "Заменить видео",
+      "botStartVideoRemove": "Удалить",
+      "botStartVideoActive": "Видео подключено",
+      "botStartVideoNone": "Видео не задано — меню с картинкой-логотипом",
+      "botStartVideoError": "Не удалось загрузить видео"
     },
     "buttons": {
       "color": "Цвет кнопки",
@@ -2924,6 +3079,7 @@
       "namePlaceholder": "Введите название тарифа",
       "description": "Описание",
       "descriptionPlaceholder": "Краткое описание тарифа",
+      "descriptionPlaceholder2": "Краткое описание тарифа",
       "trafficLimit": "Лимит трафика",
       "trafficHint": "0 = безлимитный трафик",
       "deviceLimit": "Лимит устройств",
@@ -3078,7 +3234,9 @@
         "periodsRequired": "Добавьте хотя бы один период",
         "dailyPriceRequired": "Укажите цену за день больше 0",
         "trafficPackagesRequired": "Добавьте хотя бы один пакет трафика (или отключите докупку)"
-      }
+      },
+      "lavaProductLabel": "Продукт Lava (автопродление)",
+      "lavaProductDesc": "UUID продукта из кабинета Lava: цена и периодичность списаний задаются там. Пусто — автопродление для тарифа недоступно."
     },
     "servers": {
       "title": "Управление сквадами",
@@ -3472,7 +3630,9 @@
         "validDaysHint": "0 или пусто — бессрочно",
         "create": "Создать партию",
         "creating": "Создание…",
-        "cancel": "Отмена"
+        "cancel": "Отмена",
+        "maxPerUser": "Лимит на пользователя",
+        "maxPerUserHint": "Сколько купонов этой партии может активировать один человек. 0 — без ограничения; для раздач и конкурсов ставьте 1."
       },
       "validation": {
         "nameRequired": "Укажите название партии",
@@ -3497,7 +3657,8 @@
         "validUntil": "Действует до",
         "perpetual": "Бессрочно",
         "createdAt": "Создана",
-        "linksTitle": "Активные ссылки ({{count}} шт.)"
+        "linksTitle": "Активные ссылки ({{count}} шт.)",
+        "maxPerUser": "На пользователя"
       },
       "revoke": {
         "button": "Отозвать непогашенные ({{count}})",
@@ -3510,7 +3671,16 @@
       "errors": {
         "loadFailed": "Партия не найдена",
         "createFailed": "Не удалось создать партию",
-        "revokeFailed": "Не удалось отозвать партию"
+        "revokeFailed": "Не удалось отозвать партию",
+        "deleteFailed": "Не удалось удалить партию"
+      },
+      "delete": {
+        "button": "🗑 Удалить партию",
+        "confirmTitle": "Удалить партию?",
+        "confirmText": "Будет удалено купонов: {{count}} — вместе с самой партией.",
+        "redeemedWarning": "Среди них уже погашено: {{count}}. Пропадёт история активаций, выданные подписки не отзываются.",
+        "confirm": "Удалить",
+        "success": "Партия удалена (купонов: {{count}})"
       }
     },
     "promocodes": {
@@ -3537,7 +3707,8 @@
         "subscriptionDays": "Дни подписки",
         "trialSubscription": "Тестовая подписка",
         "promoGroup": "Группа скидок",
-        "discount": "Скидка %"
+        "discount": "Скидка %",
+        "balanceAndDays": "Баланс + дни"
       },
       "modal": {
         "editPromocode": "Редактирование промокода",
@@ -3555,6 +3726,11 @@
         "typeTrialSubscription": "Тестовая подписка",
         "typePromoGroup": "Группа скидок",
         "typeDiscount": "Процентная скидка",
+        "typeBonusSet": "Набор бонусов (баланс / дни / промогруппа)",
+        "bonusComposition": "Состав промокода",
+        "includeBalance": "Бонус на баланс",
+        "includeDays": "Дни подписки",
+        "includePromoGroup": "Промогруппа",
         "bonusAmount": "Сумма бонуса",
         "rub": "руб.",
         "daysCount": "Количество дней",
@@ -3577,7 +3753,10 @@
         "save": "Сохранить",
         "defaultTrialTariff": "Тариф триала по умолчанию",
         "selectTariff": "Выберите тариф",
-        "tariff": "Тариф"
+        "tariff": "Тариф",
+        "includeTraffic": "Трафик",
+        "trafficAmount": "Объём трафика",
+        "gb": "ГБ"
       },
       "stats": {
         "title": "Статистика промокода",
@@ -3648,11 +3827,13 @@
       },
       "validation": {
         "codeRequired": "Введите код промокода",
+        "bonusSetEmpty": "Выберите хотя бы один бонус в составе промокода",
         "balanceRequired": "Сумма бонуса должна быть больше 0",
         "daysRequired": "Количество дней должно быть больше 0",
         "groupRequired": "Выберите группу скидок",
         "discountPercentInvalid": "Процент скидки должен быть от 1 до 100",
-        "discountHoursRequired": "Укажите время действия скидки в часах"
+        "discountHoursRequired": "Укажите время действия скидки в часах",
+        "trafficRequired": "Объём трафика должен быть больше 0"
       }
     },
     "promoGroups": {
@@ -3735,7 +3916,8 @@
         "byDate": "По дате",
         "byBalance": "По балансу",
         "byActivity": "По активности",
-        "bySpent": "По расходам"
+        "bySpent": "По расходам",
+        "byExpiry": "По истечению подписки"
       },
       "pagination": {
         "showing": "Показано {{from}}-{{to}} из {{total}}"
@@ -3748,6 +3930,20 @@
       },
       "confirm": {
         "block": "Заблокировать пользователя?"
+      },
+      "sendMessage": {
+        "button": "✉️ Отправить сообщение",
+        "title": "Отправка сообщения пользователю",
+        "placeholder": "Текст, который бот отправит пользователю (поддерживается HTML)",
+        "send": "Отправить",
+        "sending": "Отправка...",
+        "success": "Сообщение отправлено пользователю",
+        "noTelegram": "Пользователь зарегистрирован только по email и не может получать сообщения в Telegram",
+        "errors": {
+          "no_telegram_id": "Пользователь зарегистрирован только по email и не может получать сообщения в Telegram",
+          "forbidden": "Пользователь заблокировал бота или не может получать сообщения",
+          "bad_request": "Telegram отклонил сообщение. Проверьте текст (HTML-разметку) и попробуйте ещё раз"
+        }
       },
       "userActions": {
         "delete": "Удалить пользователя",
@@ -3814,6 +4010,7 @@
         "purchases": "Покупок",
         "campaign": "Рекламная кампания",
         "referralsList": "Список рефералов",
+        "referralEarnings": "Реф. доход",
         "noReferrals": "Нет рефералов",
         "panelConfig": "Конфигурация панели",
         "trojanPassword": "Trojan пароль",
@@ -3904,7 +4101,17 @@
           "deviceLimitUpdated": "Лимит устройств обновлён",
           "invalidDays": "Введите корректное количество дней (больше 0)",
           "backToList": "К списку подписок",
-          "createNew": "Создать новую"
+          "createNew": "Создать новую",
+          "sbpTitle": "Автоплатёж по СБП",
+          "sbpCancel": "Отключить",
+          "sbpCancelled": "Автоплатёж по СБП отключён",
+          "sbpStatus_PENDING": "Ожидает подтверждения",
+          "sbpStatus_ACTIVE": "Активен",
+          "sbpStatus_PAST_DUE": "Платёж не прошёл",
+          "deleteTitle": "Удаление подписки",
+          "deleteHint": "Подписка и её устройства будут удалены безвозвратно",
+          "deleteButton": "Удалить подписку",
+          "deleted": "Подписка удалена"
         },
         "balance": {
           "current": "Текущий баланс",
@@ -4129,7 +4336,9 @@
         "sendError": "Не удалось отправить предложение",
         "notificationsSent": "Отправлено уведомлений",
         "offersCreated": "Создано офферов",
-        "notificationsFailed": "(не отправлено: {{count}})"
+        "notificationsFailed": "(не отправлено: {{count}})",
+        "deliveryTitle": "Доставка в Telegram",
+        "openAsBroadcast": "Открыть как рассылку"
       },
       "notFound": "Шаблон не найден",
       "noActiveTemplates": "Нет активных шаблонов",
@@ -5928,7 +6137,15 @@
     "shareModalActivateVia": "Активировать через бота:",
     "shareModalActivateViaCabinet": "Или через сайт:",
     "copyMessage": "Скопировать сообщение",
-    "shareToastCopied": "Сообщение скопировано"
+    "shareToastCopied": "Сообщение скопировано",
+    "qrHint": "Отсканируйте, чтобы активировать подарок",
+    "scanButton": "📷 Отсканировать QR",
+    "scanInProgress": "Сканирование…",
+    "scanCancel": "Остановить сканирование",
+    "scanDescription": "Наведите камеру на QR-код подарка",
+    "scanNotRecognized": "В QR-коде нет кода подарка",
+    "scanError": "Не удалось отсканировать",
+    "scanNoCamera": "Камера недоступна — введите код вручную"
   },
   "news": {
     "title": "Новости и обновления",

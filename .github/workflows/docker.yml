@@ -12,6 +12,9 @@ env:
   IMAGE_NAME: bedolaga-cabinet
   DOCKERHUB_USER: ${{ vars.DOCKERHUB_USERNAME || github.repository_owner }}
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     uses: ./.github/workflows/lint.yml
@@ -21,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -51,6 +55,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -64,3 +69,25 @@ jobs:
             VITE_TELEGRAM_BOT_USERNAME=
             VITE_APP_NAME=Cabinet
             VITE_APP_LOGO=V
+
+      # Сканируем запушенный образ на CVE. Пока non-blocking (exit-code: 0):
+      # находки уезжают в Security → Code scanning, но сборку не роняют.
+      # Для ужесточения — поставить severity-фильтр в exit-code и убрать PR-гейт.
+      - name: Scan image with Trivy
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          image-ref: ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+
+      - name: Upload Trivy results to Security tab
+        if: github.event_name != 'pull_request'
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
