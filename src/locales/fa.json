@@ -1224,7 +1224,8 @@
       "referralNetwork": "شبکه ارجاع",
       "news": "اخبار",
       "infoPages": "صفحات اطلاعات",
-      "legalPages": "صفحات سیستمی"
+      "legalPages": "صفحات سیستمی",
+      "systemErrors": "خطاهای سیستم"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -1271,7 +1272,8 @@
       "salesStatsDesc": "تحلیل فروش و روندها",
       "landingsDesc": "صفحات خرید سریع",
       "referralNetworkDesc": "نمایش بصری گراف ارجاعات و کمپین‌ها",
-      "newsDesc": "مدیریت مقالات خبری و انتشارات"
+      "newsDesc": "مدیریت مقالات خبری و انتشارات",
+      "systemErrorsDesc": "خطاهای برنامه و وضعیت تحویل آن‌ها"
     },
     "salesStats": {
       "title": "آمار فروش",
@@ -4294,6 +4296,41 @@
       "moveUp": "انتقال به بالا",
       "moveDown": "انتقال به پایین",
       "delete": "حذف"
+    },
+    "systemErrors": {
+      "title": "خطاهای سیستم",
+      "subtitle": "خطاهای برنامه و اینکه آیا هشدار آن‌ها تحویل شده است",
+      "searchPlaceholder": "جستجو بر اساس پیام، نوع خطا یا لاگر",
+      "empty": "خطایی یافت نشد",
+      "overview": {
+        "undelivered": "تحویل‌نشده",
+        "last24h": "۲۴ ساعت گذشته",
+        "last7d": "۷ روز گذشته"
+      },
+      "filters": {
+        "all": "همه",
+        "undelivered": "تحویل‌نشده",
+        "failed": "ناموفق",
+        "pending": "در انتظار",
+        "sent": "ارسال‌شده",
+        "suppressed": "سرکوب‌شده",
+        "skipped": "رد‌شده"
+      },
+      "status": {
+        "failed": "ناموفق",
+        "pending": "در انتظار",
+        "sent": "ارسال‌شده",
+        "suppressed": "سرکوب‌شده",
+        "skipped": "رد‌شده"
+      },
+      "detail": {
+        "level": "سطح",
+        "attempts": "تلاش‌ها",
+        "deliveredAt": "تحویل‌شده",
+        "userId": "شناسه کاربر",
+        "context": "زمینه",
+        "traceback": "ردیابی خطا"
+      }
     }
   },
   "adminUpdates": {
