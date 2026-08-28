@@ -4328,7 +4328,8 @@
         "deliveredAt": "送达时间",
         "userId": "用户 ID",
         "context": "上下文",
-        "traceback": "堆栈"
+        "traceback": "堆栈",
+        "retry": "重新发送"
       }
     }
   },

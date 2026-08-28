@@ -4612,7 +4612,8 @@
         "deliveredAt": "Delivered",
         "userId": "User ID",
         "context": "Context",
-        "traceback": "Traceback"
+        "traceback": "Traceback",
+        "retry": "Retry delivery"
       }
     }
   },
