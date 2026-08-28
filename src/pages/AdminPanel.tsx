@@ -343,6 +343,12 @@ const sections: AdminSection[] = [
         to: '/admin/audit-log',
         permission: 'audit_log:read',
       },
+      {
+        name: 'admin.nav.systemErrors',
+        icon: 'shield',
+        to: '/admin/system-errors',
+        permission: 'system_errors:read',
+      },
     ],
   },
 ];
