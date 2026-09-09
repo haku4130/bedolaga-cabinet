@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { backTo } from '../AdminBackButton';
 import { useNotify } from '../../../platform/hooks/useNotify';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { createNumberInputHandler } from '../../../utils/inputHelpers';
@@ -13,6 +14,7 @@ import {
 } from '../../../api/adminUsers';
 import type { PromoGroup } from '../../../api/promocodes';
 import { ServerIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Local status badge (parent has its own — duplicating here to keep
@@ -95,6 +97,7 @@ export function InfoTab(props: InfoTabProps) {
   const { t } = useTranslation();
   const { formatWithCurrency } = useCurrency();
   const navigate = useNavigate();
+  const location = useLocation();
   const notify = useNotify();
 
   // «Отправить сообщение» — паритет с бот-кнопкой в карточке юзера
@@ -441,9 +444,9 @@ export function InfoTab(props: InfoTabProps) {
             {t('admin.users.detail.referralsList')}
           </div>
           {referralsLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : referrals.length === 0 ? (
             <div className="py-2 text-center text-xs text-dark-500">
               {t('admin.users.detail.noReferrals')}
@@ -453,7 +456,7 @@ export function InfoTab(props: InfoTabProps) {
               {referrals.map((ref) => (
                 <button
                   key={ref.id}
-                  onClick={() => navigate(`/admin/users/${ref.id}`)}
+                  onClick={() => navigate(`/admin/users/${ref.id}`, backTo(location))}
                   className="flex w-full items-center justify-between rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
                 >
                   <div className="flex min-w-0 items-center gap-2">

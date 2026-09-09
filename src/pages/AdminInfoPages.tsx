@@ -1,15 +1,16 @@
 import { useCallback, useState, memo } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { infoPagesApi } from '../api/infoPages';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import { cn } from '../lib/utils';
 import { FileTextIcon, PencilIcon, PlusIcon, RefreshIcon, TrashIcon } from '@/components/icons';
 import type { InfoPageListItem, InfoPageType } from '../api/infoPages';
+import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
 
 type FilterTab = 'all' | 'page' | 'faq';
 
@@ -144,6 +145,7 @@ const PageRowWrapper = memo(function PageRowWrapper({
 export default function AdminInfoPages() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const haptic = useHapticFeedback();
   const confirm = useDestructiveConfirm();
@@ -218,7 +220,7 @@ export default function AdminInfoPages() {
           <button
             onClick={() => {
               haptic.buttonPress();
-              navigate('/admin/legal-pages');
+              navigate('/admin/legal-pages', backTo(location));
             }}
             className="flex min-h-[44px] items-center gap-2 rounded-lg bg-dark-800 px-4 py-2.5 text-dark-200 transition-colors hover:bg-dark-700"
             aria-label={t('admin.legalPages.open')}
@@ -279,29 +281,7 @@ export default function AdminInfoPages() {
 
       {/* Pages list */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl border border-dark-700 bg-dark-800/50 p-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex gap-2">
-                    <div className="h-4 w-16 rounded bg-dark-700" />
-                    <div className="h-4 w-12 rounded bg-dark-700" />
-                  </div>
-                  <div className="h-5 w-3/4 rounded bg-dark-700" />
-                  <div className="h-3 w-1/2 rounded bg-dark-700" />
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-8 w-14 rounded-full bg-dark-700" />
-                  <div className="h-8 w-8 rounded-lg bg-dark-700" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListRowSkeleton />
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
           <FileTextIcon className="h-6 w-6" />

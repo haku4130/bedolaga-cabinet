@@ -14,6 +14,7 @@ import {
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   CalendarIcon,
   CheckIcon,
@@ -21,6 +22,7 @@ import {
   PlusIcon,
   RefreshIcon,
   SunIcon,
+  StarIcon,
   TrashIcon,
 } from '@/components/icons';
 
@@ -46,6 +48,9 @@ export default function AdminTariffCreate() {
   const [maxDeviceLimit, setMaxDeviceLimit] = useState<number | ''>(0);
   const [tierLevel, setTierLevel] = useState<number | ''>(1);
   const [periodPrices, setPeriodPrices] = useState<PeriodPrice[]>([]);
+  // Период, отмеченный как самый выгодный. Хранится днями: набор периодов правят
+  // прямо на этой форме, и индекс после правки указывал бы на другой период.
+  const [highlightPeriodDays, setHighlightPeriodDays] = useState<number | null>(null);
   const [selectedSquads, setSelectedSquads] = useState<string[]>([]);
   const [selectedExternalSquad, setSelectedExternalSquad] = useState<string | null>(null);
   const [selectedPromoGroups, setSelectedPromoGroups] = useState<number[]>([]);
@@ -69,6 +74,8 @@ export default function AdminTariffCreate() {
 
   // Gift visibility
   const [showInGift, setShowInGift] = useState(true);
+  // Тариф отмечен как выгодный — выделяется в списке тарифов у клиента.
+  const [isTariffHighlighted, setIsTariffHighlighted] = useState(false);
 
   // New period for adding
   const [newPeriodDays, setNewPeriodDays] = useState<number | ''>(30);
@@ -117,6 +124,7 @@ export default function AdminTariffCreate() {
       setMaxDeviceLimit(data.max_device_limit || 0);
       setTierLevel(data.tier_level || 1);
       setPeriodPrices(data.period_prices?.length ? data.period_prices : []);
+      setHighlightPeriodDays(data.highlight_period_days ?? null);
       setSelectedSquads(data.allowed_squads || []);
       setSelectedExternalSquad(data.external_squad_uuid || null);
       setSelectedPromoGroups(
@@ -129,6 +137,7 @@ export default function AdminTariffCreate() {
       setTrafficTopupPackages(data.traffic_topup_packages || {});
       setTrafficResetMode(data.traffic_reset_mode || null);
       setShowInGift(data.show_in_gift ?? true);
+      setIsTariffHighlighted(data.is_highlighted ?? false);
       return data;
     }, []),
   });
@@ -163,6 +172,7 @@ export default function AdminTariffCreate() {
       description: isEdit ? description : description || undefined,
       is_active: isActive,
       show_in_gift: showInGift,
+      is_highlighted: isTariffHighlighted,
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
       device_limit: toNumber(deviceLimit, 1),
       device_price_kopeks:
@@ -170,6 +180,8 @@ export default function AdminTariffCreate() {
       max_device_limit: toNumber(maxDeviceLimit) > 0 ? toNumber(maxDeviceLimit) : undefined,
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
+      // 0 — «снять выделение»: пустое поле означало бы «не трогать».
+      highlight_period_days: isDaily ? 0 : (highlightPeriodDays ?? 0),
       allowed_squads: selectedSquads,
       external_squad_uuid: selectedExternalSquad || null,
       promo_group_ids: selectedPromoGroups,
@@ -219,6 +231,13 @@ export default function AdminTariffCreate() {
 
   const removePeriod = (days: number) => {
     setPeriodPrices((prev) => prev.filter((p) => p.days !== days));
+    // Удалённый период не может оставаться выделенным.
+    setHighlightPeriodDays((current) => (current === days ? null : current));
+  };
+
+  /** Повторное нажатие снимает выделение — отдельной кнопки «снять» не нужно. */
+  const toggleHighlight = (days: number) => {
+    setHighlightPeriodDays((current) => (current === days ? null : days));
   };
 
   const updatePeriodPrice = (days: number, priceRubles: number) => {
@@ -274,9 +293,12 @@ export default function AdminTariffCreate() {
   // Loading state
   if (isEdit && isLoadingTariff) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <div className="flex gap-2">
+          <Skeleton count={4} className="h-10 w-28 shrink-0 rounded-xl" />
+        </div>
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 
@@ -648,6 +670,19 @@ export default function AdminTariffCreate() {
                   />
                   <span className="text-dark-400">₽</span>
                   <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => toggleHighlight(period.days)}
+                    title={t('admin.tariffs.bestValueHint')}
+                    aria-pressed={highlightPeriodDays === period.days}
+                    className={`rounded-lg p-2 transition-colors ${
+                      highlightPeriodDays === period.days
+                        ? 'bg-urgent-400/20 text-urgent-400'
+                        : 'text-dark-400 hover:bg-dark-700 hover:text-dark-200'
+                    }`}
+                  >
+                    <StarIcon filled={highlightPeriodDays === period.days} className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={() => removePeriod(period.days)}
                     className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400"
@@ -1121,6 +1156,31 @@ export default function AdminTariffCreate() {
                 <span
                   className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
                     isActive ? 'left-6' : 'left-1'
+                  }`}
+                />
+              </button>
+            </div>
+            {/* Highlight tariff toggle */}
+            <div className="flex items-center justify-between rounded-lg bg-dark-800 p-3">
+              <div>
+                <span className="text-sm font-medium text-dark-200">
+                  {t('admin.tariffs.highlightLabel')}
+                </span>
+                <p className="text-xs text-dark-500">{t('admin.tariffs.highlightHint')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTariffHighlighted(!isTariffHighlighted)}
+                role="switch"
+                aria-checked={isTariffHighlighted}
+                aria-label={t('admin.tariffs.highlightLabel')}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isTariffHighlighted ? 'bg-urgent-400' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                    isTariffHighlighted ? 'left-6' : 'left-1'
                   }`}
                 />
               </button>

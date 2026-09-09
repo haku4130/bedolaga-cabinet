@@ -216,6 +216,13 @@
     "checkEmail": "请查收邮件",
     "verificationSent": "我们已发送验证链接至：",
     "clickLinkToVerify": "点击邮件中的链接验证账户并登录。",
+    "spamHint": "没收到邮件？请检查「垃圾邮件」和「推广」文件夹——投递有时需要几分钟。",
+    "resendVerification": "重新发送邮件",
+    "resendIn": "{{seconds}} 秒后可重新发送",
+    "resendSent": "邮件已发送，请查收。",
+    "resendError": "邮件发送失败，请稍后重试。",
+    "resendTooOften": "操作过于频繁，请几分钟后再试。",
+    "useAnotherEmail": "换一个邮箱",
     "backToLogin": "返回登录",
     "emailNotVerified": "请先验证邮箱",
     "emailAlreadyRegistered": "此邮箱已注册",
@@ -351,6 +358,7 @@
     "renew": "续费",
     "free": "免费",
     "extend": "延长订阅",
+    "bestValue": "超值",
     "buyTraffic": "购买流量",
     "buyDevices": "增加设备",
     "renewalOptions": "续费选项",
@@ -468,6 +476,14 @@
       "reduceDevicesDescription": "您可以将设备数量减少至套餐的最低限制",
       "reduceDevicesTitle": "减少设备数量",
       "reduceUnavailable": "当前无法减少设备数量",
+      "alreadyAtMinDeviceLimit": "已是您套餐的最低设备数",
+      "reasons": {
+        "noSubscription": "未找到订阅",
+        "noActiveSubscription": "没有有效的订阅",
+        "maxDevicesReached": "已达到设备上限（{{count}}）",
+        "canAddLimited": "最多还能添加 {{count}} 台设备",
+        "trialNotAllowed": "试用订阅不支持减少设备数"
+      },
       "reducing": "正在减少…"
     },
     "serverManagement": {
@@ -718,6 +734,12 @@
       "cispay": {
         "description": "通过 cisPay 使用银行卡或 SBP 支付"
       },
+      "tabpay": {
+        "description": "通过 TabPay 使用银行卡或 SBP 支付"
+      },
+      "paritypay": {
+        "description": "通过 ParityPay 使用银行卡或 SBP 支付"
+      },
       "donut": {
         "description": "通过 Donut P2P 使用银行卡或 SBP 支付"
       },
@@ -847,14 +869,32 @@
       "totalReferrals": "总推荐数",
       "activeReferrals": "活跃",
       "totalEarnings": "总收益",
-      "commissionRate": "佣金比例"
+      "commissionRate": "佣金比例",
+      "earnedDays": "{{count}} 天订阅",
+      "chainDepth": "网络深度",
+      "levelsValue": "最多 {{count}} 级",
+      "yourLevel": "您的等级",
+      "levelNotReached": "尚未达到"
     },
     "terms": {
       "title": "计划条款",
       "commission": "佣金",
       "minTopup": "最低充值",
       "newUserBonus": "新用户奖励",
-      "inviterBonus": "邀请人奖励"
+      "inviterBonus": "邀请人奖励",
+      "noLevels": "奖励等级尚未配置，暂不发放奖励。",
+      "tierNext": "距离第 {{level}} 级还差 {{count}} 人",
+      "tierNone": "尚未达到任何等级——从第一个门槛开始发放奖励。",
+      "modeChain": "多个层级同时发放奖励：为您邀请的人、为他邀请的人，依此类推。",
+      "modeTiers": "只有一个等级生效——由您邀请的人数解锁的那一级。奖励仅来自您直接邀请的人。",
+      "currentBadge": "您的等级",
+      "levelLabel": "第 {{level}} 级",
+      "fromActive": "需 {{count}} 位已充值的推荐用户",
+      "fromAny": "需邀请 {{count}} 人",
+      "startingLevel": "立即可用",
+      "refereeGets": "受邀用户获得：{{reward}}",
+      "paysNothing": "不向您发放",
+      "personalRate": "您有 {{percent}}% 的专属费率——适用于任何等级。"
     },
     "yourReferrals": "您的推荐",
     "noReferrals": "暂无推荐。分享链接邀请好友！",
@@ -874,12 +914,18 @@
       "referral_registration": "推荐用户注册",
       "referral_first_payment": "推荐用户首次付款",
       "referral_subscription_renewal": "推荐用户续订",
-      "referral_bonus": "推荐奖金"
+      "referral_bonus": "推荐奖金",
+      "referral_first_topup": "首次充值",
+      "referral_commission_topup": "充值佣金",
+      "referral_registration_reward": "注册奖励",
+      "referral_days_reward": "订阅天数",
+      "referral_days_bonus": "赠送天数"
     },
     "disabled": "推荐计划暂时停用",
     "partner": {
       "becomePartner": "成为合作伙伴",
       "becomePartnerDesc": "申请加入合作伙伴计划，获得更高的佣金率并可以提现您的收益。",
+      "becomePartnerDescNoWithdrawal": "申请加入合作伙伴计划，获得更高的佣金率。",
       "applyButton": "申请",
       "applyTitle": "合作伙伴申请",
       "applyDesc": "填写以下表格申请我们的合作伙伴计划。所有字段均为可选。",
@@ -976,6 +1022,30 @@
         "rejected": "已拒绝",
         "cancelled": "已取消"
       }
+    },
+    "levelBadge": "第 {{count}} 级",
+    "days": "{{count}} 天",
+    "daysWithTariff": "“{{tariff}}” {{count}} 天",
+    "shareMessageBonus": "加入 {{botName}}！通过此链接注册的奖励：{{bonus}}",
+    "shareMessagePlain": "通过我的链接加入 {{botName}}！",
+    "shareHintLevels": "把链接分享给朋友——奖励按推荐计划的等级发放。",
+    "rewardSettings": {
+      "title": "奖励设置",
+      "intro": "选择推荐奖励的形式，以及订阅天数计入哪个订阅。",
+      "kindHeader": "获取方式",
+      "kindMoney": "现金到余额",
+      "kindDays": "订阅天数",
+      "kindHint": "请选择一项。在等级同时提供现金和天数时生效；若等级只给其中一种，您将获得该种。",
+      "targetHeader": "天数计入何处",
+      "targetAuto": "自动选择",
+      "targetAutoHint": "天数计入到期日最晚的付费订阅。",
+      "targetHint": "若等级指定了资费，天数仍会计入该资费的订阅——这是管理员的设置。",
+      "targetNone": "您还没有可供选择的订阅。",
+      "subscription": "订阅",
+      "until": "至 {{date}}",
+      "saveError": "设置保存失败",
+      "kindMoneyHint": "奖励以金额计入余额",
+      "kindDaysHint": "奖励延长您的订阅"
     }
   },
   "support": {
@@ -1194,6 +1264,7 @@
       "dashboard": "统计",
       "tickets": "工单",
       "settings": "设置",
+      "graceAccess": "宽限访问",
       "apps": "应用",
       "wheel": "转盘",
       "tariffs": "套餐",
@@ -1208,11 +1279,13 @@
       "promocodes": "促销码",
       "promoGroups": "折扣组",
       "remnawave": "Remnawave",
+      "reachability": "BSCHEKER",
       "users": "用户",
       "trafficUsage": "流量使用",
       "updates": "更新",
       "pinnedMessages": "置顶消息",
       "partners": "合作伙伴",
+      "referralLevels": "奖励等级",
       "withdrawals": "提现",
       "channelSubscriptions": "必订频道",
       "roles": "角色",
@@ -1603,9 +1676,37 @@
       "clickToInsert": "点击插入到文本中",
       "insertDefault": "插入默认模板",
       "insertDefaultConfirm": "用默认模板替换当前内容？",
+      "sendingToggle": "发送此邮件",
+      "sendingOnHint": "此邮件正在发送。关闭后，此类型邮件将不再发送给任何人。",
+      "sendingOffHint": "此邮件已关闭，不会发送给任何人。开启即可恢复。",
+      "sendingLocked": "此邮件无法关闭：没有它用户将无法登录或收到所购内容。",
+      "sendingOn": "已开启邮件发送",
+      "sendingOff": "已关闭邮件发送",
+      "sendingOffBadge": "不发送",
       "testRecipientPlaceholder": "收件人邮箱（默认为您的邮箱）",
       "testHint": "发送当前编辑器内容，变量将替换为示例值。",
       "variablesCommon": "通用变量（适用于所有模板）"
+    },
+    "emailQueue": {
+      "title": "邮件队列",
+      "hint": "仅首次发送失败的邮件",
+      "clearPending": "清除等待中",
+      "clearAll": "清空",
+      "confirmPending": "清除等待发送的邮件？",
+      "confirmAll": "清空整个队列，包括历史记录？",
+      "cleared": "队列已清空：{{count}}",
+      "noSmtp": "未配置邮件服务器，邮件不会发送。请在设置的 SMTP 部分填写地址。",
+      "statusPending": "等待重试",
+      "statusSent": "重试后送达",
+      "statusDead": "未送达",
+      "reasonNoSmtp": "未配置邮件服务器",
+      "reasonExpired": "邮件内容已过期",
+      "reasonFailed": "发送失败",
+      "more": "还有 {{count}} 封",
+      "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。",
+      "captionPending": "等待中",
+      "captionSent": "已送达",
+      "captionDead": "未送达"
     },
     "payments": {
       "title": "支付",
@@ -2017,6 +2118,8 @@
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
+        "payments_tabpay": "TabPay",
+        "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -2049,6 +2152,7 @@
         "db_redis": "Redis",
         "sys_core": "核心与调试",
         "sys_remnawave": "Remnawave",
+        "sys_reachability": "BSCHEKER",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "服务器状态",
@@ -2090,6 +2194,164 @@
       "botStartVideoActive": "已设置视频",
       "botStartVideoNone": "未设置视频 — 菜单使用 logo 图片",
       "botStartVideoError": "视频上传失败"
+    },
+    "graceAccess": {
+      "title": "宽限访问",
+      "subtitle": "临时受限访问，让用户仍有机会续订",
+      "loadError": "无法加载宽限访问设置",
+      "saveError": "无法保存设置",
+      "save": "保存",
+      "saving": "保存中…",
+      "discard": "撤销",
+      "dirty": "有未保存的更改",
+      "envLocked": "该值固定在 .env 中，此处无法修改",
+      "restartOnly": "重启机器人后生效",
+      "badge": {
+        "false": "已关闭",
+        "observe": "观察",
+        "true": "已开启",
+        "drain": "排空"
+      },
+      "modeSection": {
+        "title": "模式",
+        "hint": "模式在机器人启动时读取，保存的值需要重启后才会生效。"
+      },
+      "modes": {
+        "false": {
+          "label": "已关闭",
+          "desc": "不发放也不结束宽限会话"
+        },
+        "observe": {
+          "label": "观察",
+          "desc": "仅记录候选，不修改面板"
+        },
+        "true": {
+          "label": "已开启",
+          "desc": "发放临时访问并在结束后恢复"
+        },
+        "drain": {
+          "label": "排空",
+          "desc": "不再新增会话，把已开启的处理完"
+        }
+      },
+      "restart": {
+        "title": "需要重启机器人",
+        "body": "当前运行模式为「{{running}}」，已保存模式为「{{configured}}」。重启之前，宽限访问按运行模式工作。"
+      },
+      "issues": {
+        "title": "配置问题",
+        "titleBeforeEnabling": "开启前需要补齐"
+      },
+      "issue": {
+        "squad_required": "小队未填写：{{field}}。缺少它就无法切换到「已开启」——机器人会以关闭状态启动。",
+        "squad_invalid": "UUID 格式错误：{{field}}",
+        "traffic_required": "流量上限不得少于 1 GB",
+        "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
+        "number_required": "数值未填写：{{field}}",
+        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。"
+      },
+      "fields": {
+        "mode": "模式",
+        "expired_squad_uuid": "订阅到期使用的小队",
+        "limited_squad_uuid": "流量耗尽使用的小队",
+        "external_squad_uuid": "外部小队",
+        "duration_hours": "时长（小时）",
+        "traffic_gb": "流量（GB）",
+        "reconcile_interval_seconds": "核对间隔（秒）",
+        "reconcile_batch_size": "批量大小",
+        "candidate_lookback_minutes": "回溯窗口（分钟）"
+      },
+      "squads": {
+        "title": "小队",
+        "hint": "宽限期间用户被移动到哪里。原始状态会被快照保存，结束时恢复。",
+        "choose": "选择小队",
+        "manual": "手动输入 UUID…",
+        "members": "{{n}} 人",
+        "unavailable": "面板不可用 — 可手动输入 UUID",
+        "expiredDesc": "订阅到期时使用",
+        "limitedDesc": "流量上限耗尽时使用"
+      },
+      "external": {
+        "detach": "移除",
+        "keep": "保持不变",
+        "custom": "备用小队",
+        "detachDesc": "宽限期间移除外部小队，结束后恢复",
+        "keepDesc": "不改动用户的外部小队",
+        "customDesc": "宽限期间使用指定的小队"
+      },
+      "limits": {
+        "title": "限制",
+        "durationDesc": "如果一直没有续订，访问可持续多久",
+        "trafficDesc": "宽限期间的流量上限"
+      },
+      "coverage": {
+        "title": "发放对象",
+        "hint": "默认只有付费订阅可获得宽限访问。",
+        "trial_enabled": "试用订阅",
+        "trial_enabledDesc": "试用结束后也发放宽限访问",
+        "daily_enabled": "按日订阅",
+        "daily_enabledDesc": "为按日计费的订阅发放宽限访问",
+        "free_enabled": "免费订阅",
+        "free_enabledDesc": "为零费用订阅发放宽限访问"
+      },
+      "reconcile": {
+        "title": "后台核对",
+        "hint": "机器人多久查找一次候选并处理未结束的会话",
+        "show": "展开",
+        "hide": "收起",
+        "reconcile_interval_secondsDesc": "两次核对之间的间隔",
+        "reconcile_batch_sizeDesc": "一次处理多少个会话",
+        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额"
+      },
+      "health": {
+        "title": "状态",
+        "open": "进行中",
+        "completed": "已结束",
+        "openErrors": "进行中出错",
+        "completedErrors": "已结束出错",
+        "recentErrors": "最近的错误",
+        "subscription": "订阅 #{{id}}"
+      },
+      "sessions": {
+        "title": "会话",
+        "hint": "目前谁持有临时访问，以及以往的会话如何结束",
+        "loadError": "无法加载会话",
+        "empty": "暂无会话",
+        "user": "用户",
+        "reason": "原因",
+        "state": "状态",
+        "until": "有效期至",
+        "filter": {
+          "open": "进行中",
+          "pending": "等待中",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束",
+          "errors": "有错误"
+        },
+        "states": {
+          "pending": "等待面板",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束"
+        },
+        "reasons": {
+          "expired": "已到期",
+          "limited": "流量耗尽"
+        },
+        "completion": {
+          "paid": "已续订",
+          "timeout": "宽限期结束",
+          "drained": "已排空",
+          "conflict": "面板冲突",
+          "revoked": "已撤销"
+        },
+        "forbidden": "需要 users:read 权限：该列表包含用户姓名和 Telegram ID。"
+      },
+      "fullyLocked": {
+        "title": "本页面仅可查看",
+        "body": "所有宽限设置都固定在 .env 中，文件会覆盖数据库，这里的修改不会生效。请从 .env 中删除 GRACE_ACCESS_* 行并重启机器人，即可在此管理。"
+      }
     },
     "buttons": {
       "color": "按钮颜色",
@@ -2337,6 +2599,9 @@
       "addButton": "添加",
       "noPeriodsHint": "没有添加的周期。请至少添加一个周期。",
       "daysShort": "天",
+      "bestValueHint": "将此周期标记为超值——客户会看到它被突出显示",
+      "highlightLabel": "突出显示套餐",
+      "highlightHint": "客户会看到该套餐带边框和「超值」标签",
       "serversTitle": "服务器",
       "externalSquadTitle": "外部小组",
       "externalSquadHint": "为此套餐的用户分配Remnawave外部小组。创建订阅时，用户将自动添加到所选小组。",
@@ -3597,6 +3862,421 @@
         "toPanelDesc": "从机器人导出用户到Remnawave"
       }
     },
+    "reachability": {
+      "title": "BSCHEKER",
+      "kinds": {
+        "probe": "探测",
+        "vless": "VLESS 测试",
+        "scan": "扫描 /24"
+      },
+      "status": {
+        "openSettings": "打开设置",
+        "balance": "余额",
+        "tier": "套餐",
+        "reference": "基准订阅",
+        "referenceConfigs_other": "{{count}} 个配置",
+        "activity": "当前",
+        "idle": "空闲"
+      },
+      "units": {
+        "dpiOn": "带白名单",
+        "dpiOff": "不带白名单",
+        "dpiAny": "全部"
+      },
+      "launch": {
+        "price": "价格",
+        "estimate": "估算，启动后确定准确价格",
+        "balance": "剩余余额",
+        "run": "花费 {{price}} 启动",
+        "running": "正在启动…",
+        "noTargets": "至少选择一个目标",
+        "noUnits": "没有 SIM 卡符合白名单筛选",
+        "overLimit": "超过任务价格上限（{{limit}}）",
+        "overBalance": "余额不足",
+        "busy": "{{kind}} #{{id}} 已在运行 — 请等待完成",
+        "skippedDpiOff": "被白名单模式过滤：{{units}}",
+        "skippedUnavailable": "当前不可用：{{units}}",
+        "previewFailed": "无法计算价格",
+        "confirmTitle": "扣费确认",
+        "confirmQuestion": "启动{{kind}}？",
+        "confirmTargets": "目标（{{count}}）：{{list}}",
+        "confirmUnits": "SIM（{{count}}）：{{list}}",
+        "confirmPrice": "价格：{{price}}",
+        "confirmEstimate": "价格：≈{{price}}（估算，启动后确定）",
+        "confirmBalanceAfter": "扣费后余额：{{balance}}",
+        "confirmMore": "还有 {{count}} 个",
+        "confirmCharge": "以 {{price}} 启动",
+        "started": "任务 #{{id}} 已启动",
+        "title": "启动",
+        "targetsRow": "目标",
+        "unitsRow": "SIM",
+        "total": "合计",
+        "balanceAfter": "扣费后余额",
+        "runProbe_other": "检查 {{count}} 个目标 · {{price}}",
+        "runVless_other": "测试 {{count}} 个配置 · {{price}}",
+        "runScan": "扫描子网 · {{price}}",
+        "runEmpty": "检查",
+        "details": "详情",
+        "hideDetails": "隐藏",
+        "newCheck": "新检查",
+        "noUnitsChosen": "请至少选择一张 SIM",
+        "skippedNoBs": "将在无白名单下运行：{{units}}",
+        "inProgress": "检查进行中",
+        "runShortProbe_other": "检查 {{count}} 个目标",
+        "runShortVless_other": "测试 {{count}} 个配置",
+        "runShortScan": "扫描",
+        "formula": "{{targets}} × {{units}}",
+        "summaryTargets_other": "{{count}} 个目标",
+        "summaryUnits_other": "{{count}} 张 SIM",
+        "runHosts_other": "检查 {{count}} 台服务器 · {{price}}",
+        "runShortHosts_other": "检查 {{count}} 台服务器",
+        "summaryServers_other": "{{count}} 台服务器",
+        "busyBatch": "服务器检查已在进行 — 请等待完成",
+        "timeRow": "时间",
+        "confirmServers": "服务器（{{count}}）：{{list}}"
+      },
+      "progress": {
+        "submitting": "正在发送请求…",
+        "waiting": "等待运营商响应（{{elapsed}}）",
+        "retrieving": "仍在检测，请稍候（{{elapsed}}）",
+        "polling": "检查进行中（{{elapsed}}）",
+        "cancelling": "正在取消…",
+        "hintProbe": "SIM 卡越多耗时越长：全部约需 10–20 分钟。页面会自动更新。",
+        "hintVless": "每台服务器最多 3 分钟。页面会自动更新。",
+        "hintScan": "每张 SIM 卡 15–40 秒。页面会自动更新。",
+        "cancel": "取消",
+        "failed": "检查失败",
+        "retry": "重试",
+        "cancelled": "已取消",
+        "units": "SIM 卡",
+        "waitingUnit": "等待中…",
+        "answered": "{{total}} 张 SIM 卡中 {{answered}} 张已响应",
+        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。"
+      },
+      "verdict": {
+        "reachable": "可达",
+        "blocked": "被拦截",
+        "down": "不可用",
+        "unknown": "未知",
+        "cancelled": "已取消",
+        "asExpected": "符合预期",
+        "unexpected": "不符合预期"
+      },
+      "purpose": {
+        "bs": "白名单绕过",
+        "regular": "普通",
+        "unknown": "未确定",
+        "guessed": "推测"
+      },
+      "purposeShort": {
+        "bs": "白名单",
+        "regular": "普通",
+        "unknown": "未设置"
+      },
+      "targets": {
+        "hosts": "面板主机",
+        "includeDisabled": "显示已禁用",
+        "search": "搜索主机",
+        "empty": "面板未返回主机",
+        "pickAllBs": "选择全部白名单主机",
+        "nodesTitle": "节点",
+        "nodesHint": "仅 ping",
+        "purposeToggle": "更改主机用途",
+        "count_other": "{{count}} 个目标",
+        "showAll": "显示全部主机（{{count}}）",
+        "showLess": "收起列表",
+        "whatIsWhitelist": "什么是白名单？",
+        "whitelistHelp": "白名单是运营商模式：不开 VPN 只能打开允许的网站。白名单主机用有白名单的 SIM 卡检测，普通主机用无白名单的 SIM 卡检测。",
+        "purposeChanged": "用途已更改"
+      },
+      "subscription": {
+        "title": "订阅配置",
+        "reference": "默认订阅",
+        "pickUser": "使用用户的订阅",
+        "userSearchPlaceholder": "姓名、ID 或用户名",
+        "configs_other": "{{count}} 个配置",
+        "rejected": "已跳过：{{count}}",
+        "limit": "每次测试最多 20 个配置",
+        "core": "Xray 内核",
+        "coreAuto": "自动",
+        "coreStable": "Stable",
+        "corePrerelease": "Prerelease",
+        "empty": "订阅中没有可用配置",
+        "pickBs": "白名单（{{count}}）",
+        "source": "来源",
+        "userLabel": "用户 #{{id}}",
+        "noReference": "未设置默认订阅",
+        "noReferenceHint": "在下方选择用户的订阅，或在机器人设置中指定默认订阅",
+        "input": "配置或订阅",
+        "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · 订阅 URL · base64 — 每行一条",
+        "loading": "正在加载订阅…",
+        "parseFailed": "无法解析",
+        "sourceLinks": "链接 · {{count}}",
+        "sourceSubscription": "订阅 · {{count}}",
+        "pickAll": "全部",
+        "pickNone": "重置",
+        "orPick": "或自己的配置 / 其他订阅",
+        "fromInput": "显示上方字段中的配置",
+        "selectedOf": "已选 {{selected}} / {{total}}",
+        "rejectedReasons": {
+          "stub": "占位符",
+          "unsupported_scheme": "不是配置链接",
+          "malformed": "链接损坏",
+          "subscription_failed": "订阅未加载"
+        },
+        "duplicate": "同一服务器",
+        "duplicateHint": "地址和端口与上方条目相同（“AUTO”均衡器）：启动时只测试一次"
+      },
+      "scan": {
+        "cidr": "CIDR",
+        "cidrPlaceholder": "192.0.2.0/24",
+        "fromHost": "此主机的子网",
+        "invalid": "请输入 /24 子网或 IPv4 地址",
+        "alive_other": "{{count}} 个存活地址",
+        "copy": "复制列表",
+        "copied": "已复制",
+        "perUnit": "显示各自结果",
+        "ofTotal": "共 {{total}}",
+        "willScan": "将扫描子网 {{subnet}}",
+        "cidrHint": "一个 /24 子网；输入 IP 将取其子网",
+        "probeIcmp": "ping",
+        "probeTcp": "端口",
+        "probeSni": "SNI",
+        "byOperator": "按运营商"
+      },
+      "probes": {
+        "icmp": "ICMP",
+        "tcp": "TCP",
+        "sni": "TLS-SNI",
+        "title": "探测项",
+        "icmpDesc": "ping · 3 个包",
+        "tcpDesc": "连接端口",
+        "sniDesc": "按 SNI 进行 TLS 握手",
+        "sniNames": "SNI 名称：{{names}}",
+        "sniNoNames": "TLS-SNI 需要目标中有域名——IP 地址没有 SNI 名称",
+        "sniHost": "SNI 主机",
+        "sniHostPlaceholder": "ads.x5.ru",
+        "sniHostHint": "最多 {{max}} 个名称，用逗号分隔 · 每个名称每张 SIM +4 cred",
+        "sniInvalid": "不是域名：{{names}}",
+        "sniOverLimit_other": "多余名称 {{count}} 个已丢弃：只发送前 {{max}} 个",
+        "sniAuto": "取自目标",
+        "sniMissing": "请填写 SNI 主机：IP 地址没有 TLS-SNI 名称"
+      },
+      "result": {
+        "cost": "已扣费",
+        "refunded": "退款 {{amount}}",
+        "tunnel": "隧道",
+        "targets": "目标",
+        "latency": "延迟",
+        "core": "Xray",
+        "diagnosis": "诊断",
+        "empty": "结果为空",
+        "failReason": "原因",
+        "estimate": "估算",
+        "operator": "运营商",
+        "verdict": "结论",
+        "http": "HTTP",
+        "sniMulti": "{{count}}×SNI",
+        "sniList": "SNI：{{names}}",
+        "noBs": "无白名单",
+        "reasons": {
+          "tcp_timeout": "无响应",
+          "zombie_tcp": "TLS 后断开",
+          "dataplane_dead": "网站打不开",
+          "cancelled": "已取消"
+        },
+        "list": "按 SIM 卡的结果"
+      },
+      "history": {
+        "columns": {
+          "targets": "目标"
+        },
+        "statuses": {
+          "pending": "排队中",
+          "running": "运行中",
+          "done": "完成",
+          "failed": "失败",
+          "cancelled": "已取消"
+        },
+        "loadMore": "显示更多",
+        "more": "+{{count}}",
+        "units_other": "{{count}} 张 SIM"
+      },
+      "shortcuts": {
+        "checkSubscription": "在 BSCHEKER 中检查",
+        "checkNode": "在 BSCHEKER 中检查"
+      },
+      "fleet": {
+        "onAir_other": "{{total}} 张 SIM 卡在线：{{bs}} 张有白名单，{{regular}} 张无",
+        "statement": "{{total}} 台服务器中 {{ok}} 台正常",
+        "statementAllOk": "全部 {{total}} 台服务器正常",
+        "statementNone": "面板中没有服务器",
+        "legendPartial_other": "{{count}} 台部分可用",
+        "legendDown_other": "{{count}} 台不可用",
+        "legendUnchecked_other": "{{count}} 台未检查",
+        "meta": "检查于{{age}} · {{units}}",
+        "search": "查找服务器",
+        "filter": {
+          "all": "全部",
+          "problems": "有问题",
+          "stale": "久未检查",
+          "bs": "白名单",
+          "regular": "普通"
+        },
+        "group": {
+          "down": "不可用",
+          "partial": "部分可用",
+          "unchecked": "未检查",
+          "ok": "正常"
+        },
+        "showAll": "显示全部 {{count}}",
+        "hide": "收起",
+        "state": {
+          "ok": "正常",
+          "partial": "部分可用",
+          "down": "不可用",
+          "unchecked": "未检查",
+          "checking": "检查中…"
+        },
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "justNow": "刚刚",
+        "empty": "此筛选下没有服务器",
+        "details": "详情",
+        "targets": "服务器",
+        "selectAll": "全选",
+        "columns": {
+          "units": "SIM 卡",
+          "checked": "检查时间"
+        }
+      },
+      "switch": {
+        "label": "检查什么",
+        "hosts": "主机",
+        "hostsHint": "Remnawave 面板服务器：状态与所选服务器的检查",
+        "ip": "IP / 域名",
+        "ipHint": "自己的地址：IP、IP:端口、域名或 https://…，每次最多 10 个目标",
+        "cidr": "CIDR 扫描",
+        "cidrHint": "扫描 /24 子网：SIM 卡视角的存活地址",
+        "vless": "VPN 测试",
+        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
+        "history": "历史",
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
+      },
+      "sections": {
+        "targets": "目标",
+        "probes": "探测"
+      },
+      "recent": {
+        "title": "检查历史",
+        "empty": "尚无检查",
+        "open": "详情",
+        "close": "收起",
+        "filterKind": "类型",
+        "filterStatus": "状态",
+        "all": "全部",
+        "columns": {
+          "target": "目标",
+          "time": "时间",
+          "cost": "扣费",
+          "outcome": "结果",
+          "units": "SIM 卡"
+        },
+        "outcome": {
+          "ok": "全部可达",
+          "warn": "部分",
+          "down": "不可达",
+          "pending": "进行中",
+          "na": "无结论"
+        },
+        "filter": "筛选",
+        "repeat": "重复",
+        "headline": {
+          "all_other": "全部 {{total}} 张 SIM 卡均可打开",
+          "partial_other": "{{total}} 张 SIM 卡中 {{ok}} 张可打开",
+          "none_other": "{{total}} 张 SIM 卡均无法打开",
+          "failed": "检测失败",
+          "cancelled": "检测已取消",
+          "pending": "检测进行中",
+          "scan": "存活地址：{{ok}} / {{total}}",
+          "empty": "没有结果",
+          "blockedList": "被拦截或无响应：{{list}}"
+        },
+        "batchTargets_other": "{{count}} 台服务器",
+        "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
+        "server": "服务器",
+        "allServers": "全部服务器"
+      },
+      "addresses": {
+        "label": "地址",
+        "placeholder": "ya.ru, 77.88.8.8, github.com:443 — 最多 10 个目标，逗号或换行分隔",
+        "hint": "IP、IP:端口、域名或 https://… 可混合",
+        "overLimit_other": "已丢弃 {{count}} 个多余地址：保留前十个"
+      },
+      "setup": {
+        "titleDisabled": "BSCHEKER 已关闭",
+        "titleNotConfigured": "BSCHEKER 未配置",
+        "intro": "通过 bschekbot 服务，以俄罗斯运营商 SIM 卡的视角检查服务器、订阅和子网。要启用本板块：",
+        "key": "访问密钥",
+        "keyHint": "在 bsbord.com 获取（需要 Bronze 及以上套餐）并粘贴到本板块设置",
+        "enable": "开启 BSCHEKER",
+        "enableHint": "同一设置中的开关",
+        "reference": "默认订阅（可选）",
+        "referenceHint": "面板订阅：VPN 测试无需选择用户即可取其服务器",
+        "rights": "管理员权限",
+        "rightsHint": "谁可以查看板块、谁可以启动检查：检查会消耗积分",
+        "openSettings": "打开 BSCHEKER 设置",
+        "openSite": "前往 bsbord.com 获取密钥",
+        "envNote": "如果机器人通过环境文件配置，其值优先于后台设置：请修改文件并重启机器人。",
+        "unhealthyHint": "请在 bsbord.com 检查 API 密钥和套餐"
+      },
+      "subtitle": "从俄罗斯的服务器可达性",
+      "server": {
+        "byOperators": "按运营商",
+        "catchesAll": "所有地区可用",
+        "catchesNone": "不可用",
+        "catchesNot": "在{{regions}}不可用",
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "summaryBs": "{{total}} 张白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryRegular": "{{total}} 张无白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryAny": "{{total}} 张 SIM 卡中 {{ok}} 张可用",
+        "checked": "检查于{{age}}",
+        "unchecked": "此服务器尚未检查",
+        "history": "以往检查",
+        "allHistory": "全部",
+        "checkOne": "检查此服务器 · {{price}}"
+      },
+      "batch": {
+        "minutes": "约 {{count}} 分钟",
+        "onlyChecked": "只按已检查的 SIM 卡收费。检查可随时停止。",
+        "progressTitle_other": "正在检查 {{count}} 台服务器",
+        "progressLine": "已完成 {{done}}/{{total}} · 还需{{eta}}",
+        "progressDone": "已完成 {{done}}/{{total}}",
+        "canLeave": "可以关闭页面，检查会继续。",
+        "stop": "停止",
+        "stopping": "正在停止…",
+        "spentSoFar": "已扣费：{{price}}",
+        "aside": "检查进行中",
+        "queued": "排队中",
+        "started": "检查已启动",
+        "finishedOk": "检查完成",
+        "finishedCancelled": "检查已停止",
+        "finishedFailed": "检查失败"
+      },
+      "operators": {
+        "title": "运营商",
+        "hint": "每张 SIM 卡单独计费",
+        "bs": "白名单",
+        "regular": "无白名单",
+        "noBs": "无白名单",
+        "offline": "离线",
+        "selected": "已选 {{selected}} / {{total}}",
+        "reset": "清除",
+        "recall": "同上次",
+        "pickDistrict": "{{code}} 全部 SIM 卡",
+        "unpickDistrict": "取消 {{code}} 的 SIM 卡",
+        "empty": "没有 SIM 卡：服务不可用"
+      }
+    },
     "roles": {
       "title": "角色与权限",
       "subtitle": "管理管理员角色及其权限",
@@ -4296,6 +4976,75 @@
       "moveDown": "下移",
       "delete": "删除"
     },
+    "referralLevels": {
+      "title": "推荐奖励等级",
+      "subtitle": "链条每一级可发放金额和/或订阅天数",
+      "loadError": "无法加载奖励等级",
+      "schemeLevels": "多级方案已启用",
+      "schemeLegacy": "经典方案",
+      "schemeLegacyHint": "按合作伙伴计划设置发放，等级不生效",
+      "depth": "链条深度：最多 {{count}} 级",
+      "switchToLevels": "启用多级",
+      "switchToLegacy": "返回经典",
+      "envLocked": "REFERRAL_REWARD_SCHEME 在 .env 中固定：切换不会生效，重启后以文件为准。",
+      "noActiveLevels": "方案已启用但没有激活的等级，暂不发放奖励。",
+      "levelTitle": "第 {{count}} 级",
+      "enable": "启用",
+      "disable": "停用",
+      "activeBonuses": "激活的奖励",
+      "trigger": "触发条件",
+      "toReferrer": "给推荐人",
+      "toReferee": "给被邀请人",
+      "percent": "金额百分比",
+      "fixedAmount": "固定金额",
+      "days": "订阅天数",
+      "tariff": "套餐",
+      "mainSubscription": "主订阅",
+      "maxPayments": "已付佣金上限（0 为不限）",
+      "addLevel": "添加第 {{count}} 级",
+      "modes": {
+        "money": "仅金额",
+        "days": "仅天数",
+        "both": "金额和天数"
+      },
+      "triggers": {
+        "registration": "注册时",
+        "first_topup": "首次充值时",
+        "every_topup": "每次充值时"
+      },
+      "saveError": "保存更改失败",
+      "percentRange": "百分比必须在 0 到 100 之间",
+      "beyondDepth": "链条不会超过 {{count}} 级——该等级不会发放奖励",
+      "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放",
+      "invalidValue": "值无效：{{field}}",
+      "importLegacy": "将当前设置导入第 1 级",
+      "noTariffHint": "未选择套餐时，天数计入收件人的付费订阅；有多个时选到期最晚的那个。",
+      "schemeOffWarning": "当前为经典奖励方案：以下规则已配置但不会生效。",
+      "chainDepth": "链条深度",
+      "chainDepthHint": "向上有多少层可获得奖励。第 1 级是直接推荐人，第 2 级是其推荐人。超过该深度的规则不发放奖励。最大值：{{max}}。",
+      "depthRange": "深度必须在 1 到 {{max}} 之间",
+      "requiredReferrals": "解锁该等级所需推荐人数（0 表示立即可用）",
+      "countingActive": "计数：已充值的推荐用户",
+      "countingAll": "计数：全部邀请用户",
+      "modeChain": "模式：按链条分级",
+      "modeTiers": "模式：按邀请人数分级",
+      "modeChainHint": "层级编号表示链条深度。第 1 级支付给直接推荐人，第 2 级支付给推荐他的人。一次充值会有多个层级同时支付。",
+      "modeTiersHint": "伙伴的等级随邀请人数提升。只支付给直接推荐人，且只应用一个等级——已达到的最高级。",
+      "switchToTiers": "切换为按邀请人数分级",
+      "switchToChain": "切换为按链条分级",
+      "modeEnvLocked": "REFERRAL_LEVELS_MODE 已在 .env 中固定：切换不会生效，重启后会恢复为文件中的值。",
+      "tierTitle": "第 {{count}} 级",
+      "addTier": "添加第 {{count}} 级",
+      "tierThreshold": "等级生效所需邀请人数；0 为起始级",
+      "depthNotUsed": "按邀请人数分级时不遍历链条，因此深度不适用。",
+      "noBaseTier": "所有等级的门槛都大于零：未达到最低门槛的伙伴将一无所获。请添加门槛为 0 的起始级。",
+      "duplicateThresholds": "有多个启用的等级门槛相同（{{count}}）。编号较大的等级生效——请设置不同门槛，使等级阶梯清晰明确。",
+      "tiersSubtitle": "按伙伴等级发放的金额和/或订阅天数",
+      "tierPaysNothing": "第 {{levels}} 级不向推荐人发放任何奖励。伙伴达到其门槛后收入将中断：只有一个等级生效。",
+      "tierMixedTriggers": "各等级的发放时机不同。只有伙伴已达到的等级的时机生效，其他时机的奖励不会发放。",
+      "multiTariffOff": "多资费已关闭：订阅没有资费，因此指定资费的天数不会发放。清除资费后，天数将计入主订阅。",
+      "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH 已在 .env 中固定：无法在此修改深度，重启后会恢复为文件中的值。"
+    },
     "systemErrors": {
       "title": "系统错误",
       "subtitle": "应用错误以及相关告警是否已送达",
@@ -4329,7 +5078,9 @@
         "userId": "用户 ID",
         "context": "上下文",
         "traceback": "堆栈",
-        "retry": "重新发送"
+        "retry": "重新发送",
+        "retrySent": "错误已发送至管理员聊天",
+        "retryFailed": "无法发送至管理员聊天"
       }
     }
   },

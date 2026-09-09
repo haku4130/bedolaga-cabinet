@@ -1,10 +1,11 @@
-import { useParams, useNavigate } from 'react-router';
+import { useLocation, useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { useCurrency } from '../hooks/useCurrency';
 import { StatCard } from '@/components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   XIcon,
   UsersIcon,
@@ -51,6 +52,7 @@ export default function AdminPartnerDetail() {
   const { t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { formatWithCurrency } = useCurrency();
 
@@ -74,9 +76,15 @@ export default function AdminPartnerDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 
@@ -220,7 +228,9 @@ export default function AdminPartnerDetail() {
                 {t('admin.partnerDetail.campaigns.assign')}
               </button>
               <button
-                onClick={() => navigate(`/admin/campaigns/create?partnerId=${userId}`)}
+                onClick={() =>
+                  navigate(`/admin/campaigns/create?partnerId=${userId}`, backTo(location))
+                }
                 className="rounded-lg bg-accent-500/20 px-3 py-1.5 text-xs font-medium text-accent-400 transition-colors hover:bg-accent-500/30"
               >
                 {t('admin.partnerDetail.campaigns.createNew')}

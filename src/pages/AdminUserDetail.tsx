@@ -28,9 +28,12 @@ import { ActivityTab } from '../components/admin/userDetail/ActivityTab';
 import { TicketsTab } from '../components/admin/userDetail/TicketsTab';
 import { InfoTab } from '../components/admin/userDetail/InfoTab';
 import { SubscriptionTab } from '../components/admin/userDetail/SubscriptionTab';
+import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
+import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
 import { getApiErrorMessage } from '../utils/api-error';
 import { toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // (Subscription-tab helpers: getCountryFlag / PlusIcon / MinusIcon /
 // StatusBadge / GiftStatusBadge / GiftCard moved to
@@ -129,6 +132,12 @@ export default function AdminUserDetail() {
   const [requestHistorySubId, setRequestHistorySubId] = useState<number | null>(null);
 
   const userId = id ? parseInt(id, 10) : null;
+  // Ярлык «Проверить через операторов РФ» у подписки: право запуска + включённая интеграция.
+  const reachabilityAvailable = useReachabilityAvailable();
+  const reachabilityLink =
+    hasPermission('reachability:run') && reachabilityAvailable && userId && !Number.isNaN(userId)
+      ? buildReachabilityLink({ mode: 'vless', userId })
+      : null;
 
   // React Query owns the main user fetch: caching across navigations + auto-loading
   // state. loadUser is kept as a thin refetch wrapper so the 25+ mutation handlers
@@ -766,9 +775,14 @@ export default function AdminUserDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton
+        variant="admin"
+        leading={['h-10 w-10 rounded-xl', 'h-12 w-12 rounded-full']}
+        titleWidth="w-56"
+        className="space-y-6"
+      >
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 
@@ -952,6 +966,7 @@ export default function AdminUserDetail() {
             hasPermission={hasPermission}
             formatDate={formatDate}
             locale={locale}
+            reachabilityLink={reachabilityLink}
           />
         )}
 
