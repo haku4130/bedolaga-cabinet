@@ -2197,7 +2197,7 @@
     },
     "graceAccess": {
       "title": "宽限访问",
-      "subtitle": "临时受限访问，让用户仍有机会续订",
+      "subtitle": "订阅到期后仍保留最必要的访问，让用户能够续订",
       "loadError": "无法加载宽限访问设置",
       "saveError": "无法保存设置",
       "save": "保存",
@@ -2218,20 +2218,20 @@
       },
       "modes": {
         "false": {
-          "label": "已关闭",
-          "desc": "不发放也不结束宽限会话"
+          "label": "关闭",
+          "desc": "宽限不工作。只有在没有进行中的会话时才切换到此处——否则用户会永久留在宽限小队"
         },
         "observe": {
           "label": "观察",
-          "desc": "仅记录候选，不修改面板"
+          "desc": "试运行：机器人只在日志中记录会给谁发放宽限。不改动面板，也不给任何人访问"
         },
         "true": {
-          "label": "已开启",
-          "desc": "发放临时访问并在结束后恢复"
+          "label": "开启",
+          "desc": "正式模式：发放临时访问，跟踪它，并在付款后或到期时恢复原状"
         },
         "drain": {
           "label": "排空",
-          "desc": "不再新增会话，把已开启的处理完"
+          "desc": "平滑关闭：不再发放新的，已有的会话运行到付款或到期。之后可切换为“关闭”"
         }
       },
       "restart": {
@@ -2248,7 +2248,8 @@
         "traffic_required": "流量上限不得少于 1 GB",
         "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
         "number_required": "数值未填写：{{field}}",
-        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。"
+        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。",
+        "allowed_required": "请填写保留可访问的内容：否则给用户的消息没有意义"
       },
       "fields": {
         "mode": "模式",
@@ -2259,49 +2260,64 @@
         "traffic_gb": "流量（GB）",
         "reconcile_interval_seconds": "核对间隔（秒）",
         "reconcile_batch_size": "批量大小",
-        "candidate_lookback_minutes": "回溯窗口（分钟）"
+        "candidate_lookback_minutes": "回溯窗口（分钟）",
+        "allowed_services": "保留可访问的内容",
+        "notify_admins": "通知管理员",
+        "notify_user": "告知用户"
       },
       "squads": {
         "title": "小队",
-        "hint": "宽限期间用户被移动到哪里。原始状态会被快照保存，结束时恢复。",
+        "hint": "列表来自面板，与“小队”栏目相同。机器人临时把账户移入所选小队；只放行 Telegram 需由节点的网络实现——机器人不做限制。两种情况可以选同一个小队；原始小队会被记录并在结束时恢复。",
         "choose": "选择小队",
-        "manual": "手动输入 UUID…",
+        "manual": "手动输入标识符…",
         "members": "{{n}} 人",
-        "unavailable": "面板不可用 — 可手动输入 UUID",
-        "expiredDesc": "订阅到期时使用",
-        "limitedDesc": "流量上限耗尽时使用"
+        "unavailable": "面板无响应且小队尚未同步——需要手动输入标识符",
+        "expiredDesc": "订阅期限结束时",
+        "limitedDesc": "流量上限耗尽时",
+        "synced": "面板无响应——显示上次同步的列表"
       },
       "external": {
-        "detach": "移除",
-        "keep": "保持不变",
-        "custom": "备用小队",
-        "detachDesc": "宽限期间移除外部小队，结束后恢复",
-        "keepDesc": "不改动用户的外部小队",
-        "customDesc": "宽限期间使用指定的小队"
+        "detach": "宽限期间移除",
+        "keep": "不改动",
+        "custom": "替换为指定小队",
+        "detachDesc": "移除账户的外部小队，使访问只经过宽限小队，结束时恢复",
+        "keepDesc": "账户的外部小队保持不变——经由它的访问不受限制",
+        "customDesc": "宽限期间分配指定的外部小队，之后恢复原来的",
+        "hint": "面板中的外部小队是带有其他主机和模板的独立订阅配置（例如用于绕过封锁）。如果不使用，请保持“宽限期间移除”。",
+        "squad": "指定哪个外部小队",
+        "unavailable": "面板无响应——外部小队标识符需要手动输入"
       },
       "limits": {
-        "title": "限制",
-        "durationDesc": "如果一直没有续订，访问可持续多久",
-        "trafficDesc": "宽限期间的流量上限"
+        "title": "用户获得什么",
+        "durationDesc": "如果一直没有续订，临时访问持续多少小时",
+        "trafficDesc": "这段时间可以使用多少新流量（GB）：在已用流量之上计算，原有余量不结转",
+        "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。",
+        "allowedDesc": "用户在机器人消息和邮件中会这样看到：“仅可使用：…”。宽限小队实际放行什么由节点决定——机器人只是告知。",
+        "allowedPlaceholder": "Telegram 和个人中心"
       },
       "coverage": {
-        "title": "发放对象",
-        "hint": "默认只有付费订阅可获得宽限访问。",
-        "trial_enabled": "试用订阅",
-        "trial_enabledDesc": "试用结束后也发放宽限访问",
-        "daily_enabled": "按日订阅",
-        "daily_enabledDesc": "为按日计费的订阅发放宽限访问",
-        "free_enabled": "免费订阅",
-        "free_enabledDesc": "为零费用订阅发放宽限访问"
+        "title": "哪些订阅可获得",
+        "hint": "订阅类型按资费判断：试用 → 按日 → 免费 → 普通付费。",
+        "trial_enabled": "试用期",
+        "trial_enabledDesc": "免费试用期结束后",
+        "daily_enabled": "按日资费",
+        "daily_enabledDesc": "按天扣费的资费",
+        "free_enabled": "免费资费",
+        "free_enabledDesc": "价格为零的资费",
+        "paid": "付费资费",
+        "paidDesc": "普通付费订阅——只要模式开启就始终发放",
+        "always": "始终"
       },
       "reconcile": {
-        "title": "后台核对",
-        "hint": "机器人多久查找一次候选并处理未结束的会话",
+        "title": "高级",
+        "hint": "外部小队与后台核对——很少需要改动",
         "show": "展开",
         "hide": "收起",
         "reconcile_interval_secondsDesc": "两次核对之间的间隔",
         "reconcile_batch_sizeDesc": "一次处理多少个会话",
-        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额"
+        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额",
+        "background": "后台核对",
+        "backgroundHint": "机器人多久查找一次候选并处理未结束的会话"
       },
       "health": {
         "title": "状态",
@@ -2310,7 +2326,9 @@
         "openErrors": "进行中出错",
         "completedErrors": "已结束出错",
         "recentErrors": "最近的错误",
-        "subscription": "订阅 #{{id}}"
+        "subscription": "订阅 #{{id}}",
+        "withErrors": "出错：{{n}}",
+        "noErrors": "无错误"
       },
       "sessions": {
         "title": "会话",
@@ -2351,6 +2369,14 @@
       "fullyLocked": {
         "title": "本页面仅可查看",
         "body": "所有宽限设置都固定在 .env 中，文件会覆盖数据库，这里的修改不会生效。请从 .env 中删除 GRACE_ACCESS_* 行并重启机器人，即可在此管理。"
+      },
+      "notifications": {
+        "title": "通知",
+        "hint": "宽限发放和结束时通知谁。邮件在“邮件模板”中编辑。",
+        "notify_admins": "通知聊天中的管理员",
+        "notify_adminsDesc": "发给谁、原因、截止时间以及结果——归入“续订”类别",
+        "notify_user": "在机器人和邮件中告知用户",
+        "notify_userDesc": "订阅已到期，但暂时保留对上述内容的访问，并附续订按钮；以及访问关闭时"
       }
     },
     "buttons": {
@@ -2677,7 +2703,11 @@
         "trafficPackagesRequired": "请添加至少一个流量包（或关闭流量购买）"
       },
       "lavaProductLabel": "Lava 产品（自动续订）",
-      "lavaProductDesc": "来自 Lava 后台的产品 UUID：价格与扣款周期在那里设置。留空则该套餐不支持自动续订。"
+      "lavaProductDesc": "来自 Lava 后台的产品 UUID：价格与扣款周期在那里设置。留空则该套餐不支持自动续订。",
+      "panelTagLabel": "Remnawave 面板标签",
+      "panelTagDesc": "最多 16 个字符：拉丁字母、数字和下划线。留空则使用设置中的通用标签（试用或付费）。面板中通过该标签可看出用户所用套餐。",
+      "trialDaysLabel": "此套餐的试用天数",
+      "trialDaysDesc": "留空则使用全局试用时长设置。"
     },
     "servers": {
       "title": "服务器管理",
@@ -3236,7 +3266,8 @@
         "active": "活跃",
         "withSubscription": "有订阅",
         "newToday": "今日新增",
-        "blocked": "已封禁"
+        "blocked": "已封禁",
+        "deleted": "已删除"
       },
       "status": {
         "active": "活跃",
@@ -3284,7 +3315,6 @@
         "language": "语言",
         "registration": "注册时间",
         "lastActivity": "最后活跃",
-        "botActivity": "机器人活动",
         "cabinetLastLogin": "最后登录面板",
         "vpnConnection": "VPN 连接",
         "lastConnection": "最后连接",
@@ -3515,11 +3545,16 @@
             "cabinet_login": "登录后台",
             "withdrawal": "提现申请",
             "button_click": "机器人按钮",
-            "cabinet_action": "后台操作"
+            "cabinet_action": "后台操作",
+            "miniapp_action": "Mini App 操作",
+            "screen": "打开了页面",
+            "click": "点击了",
+            "message": "发给机器人的消息"
           },
           "sources": {
             "bot": "机器人",
-            "cabinet": "后台"
+            "cabinet": "后台",
+            "miniapp": "Mini App"
           },
           "subtypes": {
             "deposit": "充值",
@@ -3548,7 +3583,92 @@
             "approved": "已批准",
             "rejected": "已拒绝",
             "completed": "已完成",
-            "command": "命令"
+            "command": "命令",
+            "payment": "支付",
+            "screen": "页面",
+            "click": "点击",
+            "message": "消息"
+          },
+          "screens": {
+            "dashboard": "首页",
+            "subscription": "订阅",
+            "purchase": "购买订阅",
+            "renew": "续费",
+            "balance": "余额",
+            "topUp": "充值",
+            "topUpResult": "支付结果",
+            "savedCards": "已保存的卡",
+            "buy": "购买页",
+            "connection": "连接",
+            "contests": "活动",
+            "coupon": "优惠券",
+            "gift": "礼物",
+            "info": "信息",
+            "news": "新闻",
+            "offer": "公开要约",
+            "privacy": "隐私政策",
+            "polls": "问卷",
+            "profile": "个人资料",
+            "accounts": "关联账户",
+            "recurrentPayments": "自动扣款",
+            "referral": "推荐",
+            "partnerApply": "合作申请",
+            "withdrawalRequest": "提现申请",
+            "support": "客服",
+            "wheel": "幸运转盘",
+            "login": "登录",
+            "merge": "合并账户",
+            "verifyEmail": "邮箱验证",
+            "resetPassword": "重置密码",
+            "tariffs": "套餐",
+            "tariffSwitch": "更换套餐",
+            "subscriptionSettings": "订阅设置",
+            "paymentStatus": "支付状态",
+            "maintenance": "维护中"
+          },
+          "actions": {
+            "trial": "激活试用",
+            "purchase": "购买订阅",
+            "purchaseTariff": "购买套餐",
+            "renew": "续费订阅",
+            "topUp": "余额充值",
+            "traffic": "购买流量",
+            "devices": "更改设备",
+            "devicePurchase": "购买设备",
+            "deviceReduce": "减少设备",
+            "deviceRemove": "删除设备",
+            "deviceRename": "重命名设备",
+            "countries": "更换服务器",
+            "pause": "暂停订阅",
+            "refreshTraffic": "重置流量",
+            "revoke": "重新签发密钥",
+            "tariffSwitch": "更换套餐",
+            "autopay": "自动续费设置",
+            "recurrentEnable": "开启自动扣款",
+            "recurrentCancel": "取消自动扣款",
+            "recurrentPurchase": "自动扣款购买",
+            "subscriptionDelete": "删除订阅",
+            "promocode": "激活优惠码",
+            "promocodeDeactivate": "停用优惠码",
+            "promoOffer": "领取优惠",
+            "ticket": "新工单",
+            "ticketMessage": "工单消息",
+            "logout": "退出登录",
+            "wheelSpin": "转动转盘"
+          },
+          "messageKinds": {
+            "text": "文本",
+            "photo": "照片",
+            "document": "文件",
+            "video": "视频",
+            "video_note": "视频消息",
+            "voice": "语音",
+            "audio": "音频",
+            "sticker": "贴纸",
+            "animation": "GIF",
+            "contact": "联系人",
+            "location": "位置",
+            "other": "消息"
           }
         }
       },
@@ -3855,7 +3975,7 @@
         "enabled": "已启用",
         "disabled": "已禁用",
         "success": "成功",
-        "runAutoSyncNow": "立即运行自动同步",
+        "runAutoSyncNow": "立即完整同步",
         "fromPanel": "从面板",
         "fromPanelDesc": "从Remnawave导入用户到机器人",
         "toPanel": "到面板",
@@ -3867,7 +3987,8 @@
       "kinds": {
         "probe": "探测",
         "vless": "VLESS 测试",
-        "scan": "扫描 /24"
+        "scan": "扫描 /24",
+        "geo": "城市 GEO"
       },
       "status": {
         "openSettings": "打开设置",
@@ -3933,7 +4054,9 @@
         "summaryServers_other": "{{count}} 台服务器",
         "busyBatch": "服务器检查已在进行 — 请等待完成",
         "timeRow": "时间",
-        "confirmServers": "服务器（{{count}}）：{{list}}"
+        "confirmServers": "服务器（{{count}}）：{{list}}",
+        "runGeo_other": "检查 {{count}} 个城市 · {{price}}",
+        "runShortGeo_other": "检查 {{count}} 个城市"
       },
       "progress": {
         "submitting": "正在发送请求…",
@@ -3951,7 +4074,8 @@
         "units": "SIM 卡",
         "waitingUnit": "等待中…",
         "answered": "{{total}} 张 SIM 卡中 {{answered}} 张已响应",
-        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。"
+        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。",
+        "hintGeo": "网站：每个城市半秒，隧道：两到三秒；城市并行检查。页面会自动更新。"
       },
       "verdict": {
         "reachable": "可达",
@@ -4011,10 +4135,15 @@
         "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · 订阅 URL · base64 — 每行一条",
         "loading": "正在加载订阅…",
         "parseFailed": "无法解析",
+        "notLoaded": "订阅未加载",
+        "noteTitle": "订阅",
         "sourceLinks": "链接 · {{count}}",
         "sourceSubscription": "订阅 · {{count}}",
         "pickAll": "全部",
         "pickNone": "重置",
+        "filter": "按名称或地址查找",
+        "filterNone": "未找到",
+        "filterShown": "显示 {{shown}} / {{total}}",
         "orPick": "或自己的配置 / 其他订阅",
         "fromInput": "显示上方字段中的配置",
         "selectedOf": "已选 {{selected}} / {{total}}",
@@ -4160,7 +4289,9 @@
         "vless": "VPN 测试",
         "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
         "history": "历史",
-        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少",
+        "geo": "GEO",
+        "geoHint": "从俄罗斯城市以家庭和移动运营商的视角检查，每次最多 20 个目标和一个配置"
       },
       "sections": {
         "targets": "目标",
@@ -4179,7 +4310,7 @@
           "time": "时间",
           "cost": "扣费",
           "outcome": "结果",
-          "units": "SIM 卡"
+          "units": "来源"
         },
         "outcome": {
           "ok": "全部可达",
@@ -4199,7 +4330,8 @@
           "pending": "检测进行中",
           "scan": "存活地址：{{ok}} / {{total}}",
           "empty": "没有结果",
-          "blockedList": "被拦截或无响应：{{list}}"
+          "blockedList": "被拦截或无响应：{{list}}",
+          "geo_other": "{{total}} 个城市中 {{ok}} 个正常"
         },
         "batchTargets_other": "{{count}} 台服务器",
         "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
@@ -4275,6 +4407,134 @@
         "pickDistrict": "{{code}} 全部 SIM 卡",
         "unpickDistrict": "取消 {{code}} 的 SIM 卡",
         "empty": "没有 SIM 卡：服务不可用"
+      },
+      "geo": {
+        "targets": {
+          "count": "目标 {{count}} / {{max}}",
+          "overLimit": "每次最多 {{max}} 个目标，请去掉多余的",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — 用逗号或换行分隔",
+          "hint": "域名、IP、带端口的地址或网站链接。GEO 不检查子网。",
+          "noCidr": "子网无法在这里检查，请使用「CIDR 扫描」标签页",
+          "configTitle": "隧道配置",
+          "configHint": "来自面板订阅或粘贴链接的一个服务器 — vless 或 hysteria2",
+          "kindLabel": "检查对象",
+          "kinds": {
+            "hosts": "面板主机",
+            "addresses": "IP / 域名",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave 面板服务器：每次最多 20 个，按服务器端口探测",
+            "addresses": "IP · IP:端口 · 域名 · https://… — 用逗号或换行分隔；不检查子网",
+            "vless": "来自面板订阅或粘贴链接的一个 vless 或 hysteria2 配置"
+          }
+        },
+        "scope": {
+          "title": "从哪里",
+          "hint": "网络、地理、运营商",
+          "label": "范围",
+          "all": "全俄罗斯",
+          "district": "联邦区",
+          "region": "地区",
+          "cities": "城市",
+          "pickDistrict": "联邦区",
+          "pickRegion": "— 选择地区 —",
+          "cityFind": "查找城市…",
+          "cityTruncated": "未全部显示：找到 {{total}} 个，请细化名称",
+          "removeCity": "移除城市",
+          "isps_other": "{{count}} 个运营商"
+        },
+        "network": {
+          "label": "网络",
+          "res": "家庭宽带",
+          "mob": "移动网络"
+        },
+        "limit": {
+          "label": "城市数 · 按人口排名",
+          "all": "全部"
+        },
+        "isp": {
+          "label": "运营商",
+          "any": "任意（城市内随机）",
+          "all": "每个城市的每家运营商各测一次",
+          "allNeedsScope": "仅在选择联邦区、地区或城市列表时可用"
+        },
+        "method": {
+          "title": "方法",
+          "label": "探测",
+          "tcp": "TCP 端口",
+          "tls": "TLS 握手",
+          "tcpHint": "端口接受连接",
+          "tlsHint": "网站真的能打开",
+          "hostsHint": "VPN 主机在没有正确 SNI 时 TLS 会误报拒绝 — 面板主机默认用 TCP",
+          "heavy": "重探测：检测 TSPU 限速",
+          "heavyHint": "每个目标传输 >16 KB；仅限域名；每个城市每个目标约 +0.055 MB"
+        },
+        "verdicts": {
+          "ok": "正常",
+          "partial": "部分",
+          "throttled": "被限速",
+          "blocked": "被封锁（已确认）",
+          "unconfirmed": "未确认，请重试",
+          "exit_bad": "运营商线路无响应（不算结果）",
+          "target_error": "目标返回错误",
+          "no_ru_node": "没有 RU 节点",
+          "no_udp": "出口不支持 UDP (hy2)",
+          "port_blocked": "端口无法检查（代理网络禁止）"
+        },
+        "result": {
+          "progress": "已完成 {{done}} / {{total}}",
+          "noise": "不算结果：{{count}}",
+          "find": "查找城市或地区…",
+          "cities_other": "{{count}} 个城市",
+          "picked": "地图上：{{label}} · {{count}}",
+          "pickedClear": "显示全部"
+        },
+        "rows": {
+          "city": "城市",
+          "provider": "运营商",
+          "empty": "没有符合筛选的城市",
+          "notChecked": "未检查：{{reason}}",
+          "latency": "{{value}} 毫秒",
+          "kbps": "{{value}} kbps",
+          "froze": "冻结",
+          "recheck": "重复",
+          "tags": {
+            "newExit": "新出口",
+            "newExitTitle": "复查后使用了另一出口 — 原行保留",
+            "exitChanged": "出口已更换",
+            "exitChangedTitle": "请求同一出口，但代理更换了它",
+            "flaky": "第二次成功",
+            "flakyTitle": "第一次探测失败，同一出口重试成功；运营商线路不稳定"
+          }
+        },
+        "launch": {
+          "citiesRow": "城市数",
+          "maxNodes": "该模式上限 {{count}}",
+          "applyLimit": "将上限设为 {{count}}",
+          "confirmCities": "城市数：{{count}}"
+        },
+        "fromHost": "从俄罗斯城市检查",
+        "map": {
+          "close": "关闭",
+          "noCities": "本次检查未覆盖此地区的城市",
+          "zoomIn": "放大",
+          "zoomOut": "缩小",
+          "reset": "整张地图",
+          "more": "还有 {{count}} 个"
+        },
+        "recheck": {
+          "sameIp": "同一 IP",
+          "newIp": "更换 IP",
+          "busy": "检查中…",
+          "done": "已复查",
+          "doneTitle": "此行已复查 — 新结果单独成行",
+          "sameIpNoSid": "重复检查（出口将重新选择）",
+          "sameIpHold": "通过同一 IP {{ip}} 重复 — 出口还会保持约 {{seconds}} 秒",
+          "sameIpExpired": "通过同一 IP {{ip}} 重复 — 保持已到期；若代理更换出口，该行将标记为“出口已更换”",
+          "newIpTitle": "更换 IP：此城市的另一出口/提供商。此行保留，新行带标记加入",
+          "failed": "无法启动复查"
+        }
       }
     },
     "roles": {
@@ -5274,6 +5534,7 @@
       "unlink": "取消关联",
       "unlinkConfirm": "确定吗？取消关联后，您将无法通过此服务登录。",
       "unlinkConfirmBtn": "确认取消关联？",
+      "unlinkForgetsEmail": "邮箱 {{email}} 也会随之被遗忘：它来自该服务，且未设置邮箱登录密码。",
       "cannotUnlinkLast": "无法取消最后一种登录方式",
       "linkSuccess": "账户关联成功",
       "unlinkSuccess": "账户取消关联成功",

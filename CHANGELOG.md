@@ -1,5 +1,84 @@
 # Changelog
 
+## [1.75.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.74.0...v1.75.0) (2026-09-14)
+
+
+### Features
+
+* **accounts:** предупреждение, какой email будет забыт при отвязке провайдера ([394c59c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/394c59cefe000ea0000b4d3c35186969645e8573))
+* **grace:** внешний сквад для «Заменить на указанный» выбирается из списка панели ([6e42870](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6e42870f9535cfc290fb27b6a2c0b4a64060ab5f))
+* **grace:** поле «что остаётся доступным» и выключатели уведомлений ([d9be0bd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d9be0bd804e2eaad19adf7a156b1912f8423cab9))
+
+
+### Bug Fixes
+
+* «Действует до: Invalid Date» в карточке успеха — нераспознанную дату показывать как есть ([603fdd0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/603fdd098af197b8392ee7b8eca57e35b7356046))
+* **grace:** кнопка «Скрыть» у блока «Дополнительно» не работала при настроенном внешнем скваде ([ddd3504](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ddd350421da35260812cadbb867f4e6a2808712f))
+* **grace:** подзаголовок раздела без прибитого Telegram ([29af2c5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/29af2c536dcfdc0b5787908c1b7a1b2243e17b10))
+* **grace:** подсказка поля «что остаётся доступным» — фраза в сообщениях теперь после двоеточия ([6553146](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/655314660db44063e3f3fc1a397dfa882d96c983))
+* **grace:** раздел grace-доступа по канону дизайна и человеческими словами ([974c7c8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/974c7c829d70616b4b96dd921fc8fb0bf07e7ad4))
+* **grace:** состояние в две карточки, режимы и сквады описаны словами ([09f4485](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/09f44858ed76a77572c53cbd7596acac7eb8e71c))
+* дни на графике дохода — календарные, а не полночь UTC (bot [#3136](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/3136)) ([06c9802](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/06c9802829c0fdc58556408843e9f87fd60c40a1))
+
+## [1.74.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.73.0...v1.74.0) (2026-09-11)
+
+
+### Features
+
+* **admin:** в сводке пользователей карточка «Удалено» — «Всего» складывается из активных, заблокированных и удалённых ([867d88f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/867d88f251fb73c326adf1ba39f3150e72559b73))
+* **reachability:** вердикты GEO, коды регионов карты, состояние «откуда» и тело запроса ([41c3c00](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/41c3c00e2baa488a84430790fabd90b048872fe4))
+* **reachability:** вкладка GEO — режим, типы и справочник в API кабинета ([ef13faa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ef13faad45f36f15db2689e26360c14df3670bfd))
+* **reachability:** вкладка GEO по образцу оригинала — карта РФ с границами, цели переключателем ([d8bae0a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d8bae0a1e372a345f936e4082aa9dc9239d59685))
+* **reachability:** запуск GEO из вкладки — цели, откуда, метод, резерв и потолок городов в панели ([c2c6bf1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c2c6bf114a6d4760d1b676fe143def810f33f6e9))
+* **reachability:** карта GEO на телефоне — зум и сдвиг ([59c1b9b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59c1b9bc3ce2f23c58e1043e201ce3108de9d798))
+* **reachability:** карта регионов РФ для GEO — регион красится по худшему результату его городов ([a3d66cf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3d66cf12e6e9b150f0f614c5483426aa5349a5f))
+* **reachability:** повтор города GEO — в тот же тест, без новой строки в истории ([ead124a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ead124a311cf58001f7c2402ccbf3a80343c5f9e))
+* **reachability:** повтор города GEO один в один с оригиналом и подсказка панелью на телефоне ([fb365d5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fb365d56a2263e67debe195ac5e3ecf0fe690d49))
+* **reachability:** подписка на тысячи серверов и причины отказа словами ([c661b60](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c661b6040e46f189917405337076f5deae9ece47))
+* **reachability:** подсказка карты GEO как в оригинале и перепроверка города из отчёта ([0d1be2c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0d1be2cdb506a8e1bdb02941fc5acf232950062c))
+* **reachability:** результат GEO — сводка вердиктов, карта, города с фильтрами, история ([7ad64fd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7ad64fd48471316a041848faf2de76c45b5b0889))
+* **reachability:** форма GEO — цели из трёх источников, «откуда» по справочнику, метод пробы ([d691209](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d691209fb050f9bfd0429ba0bfa80d26b4dbaa8a))
+* **reachability:** ярлык «Проверить из городов РФ» с карточки хоста ([2795aa7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2795aa76a30a9aa540bd35e75e95978dc8b5eeaa))
+
+
+### Bug Fixes
+
+* **admin:** карточка пользователя пересоздаётся при переходе к другому пользователю ([16f83b2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/16f83b2ddfa7f82c339fe26d35a7636a74ff8edc))
+* **reachability:** без прокрутки к списку при касании карты GEO на телефоне ([a6aa3fe](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a6aa3fe6f8da418cc36aa0cb9ea6485a6911071c))
+* **reachability:** карта GEO на телефоне — касание сужает список, а не дублирует его панелью ([903f67a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/903f67aec56414c7152a1aaa9ddf973c2d4397cd))
+* **reachability:** карта без глифов подписей — они перехватывали клики по регионам ([5e39ccd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5e39ccdad6b05904ddde480b1d68afcf90c2d390))
+* **reachability:** кнопки повтора GEO в каноне кабинета — логика оригинала, вид свой ([ea87ee2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ea87ee2543a2352f80c3b0c7f0c73c73d3da95ac))
+* **reachability:** слои карты без подчёркиваний — в произвольных вариантах Tailwind они становились пробелами ([a0dd1c9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a0dd1c98e62f272e9790ff248e3ce0ce564d3160))
+
+## [1.73.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.72.0...v1.73.0) (2026-09-10)
+
+
+### Features
+
+* **admin:** «Активность» — каждое нажатие в кабинете ([4118115](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/41181155cb73494f7232479c60af81ebff547571))
+* **admin:** «Активность» — каждый экран и каждое действие, по-человечески ([8c076d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8c076d89c5a0f075886bf63938803c214547148f))
+* **admin:** тег панели Remnawave и дни триала в форме тарифа ([46be70e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/46be70ed009c990296f7cbac8ebdce2b43c3493d))
+
+
+### Bug Fixes
+
+* **admin:** не слать ноль выгодного периода при создании тарифа ([8b36331](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8b363311db8673ddd174ae80473fd61731a65584))
+
+## [1.72.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.1...v1.72.0) (2026-09-09)
+
+
+### Features
+
+* **subscription:** выгодный период выбирается сразу, а не первый по счёту ([14832d0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/14832d0d219506e629c25005520c297801bdf585))
+
+
+### Bug Fixes
+
+* **admin:** цену периода тарифа можно поставить нулём ([e53803a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e53803a153ad551008a18481e365ad827b0698d4))
+* **subscription:** выбранный выгодный вариант не теряет жёлтый контур ([388b974](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/388b974fbd148fda82bf489d65303987bafcb8e9))
+* **subscription:** не спрашивать состояние выключенной автооплаты ([57a3d94](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/57a3d94d0b4c61d2042557c037d267e67a9e6e47))
+* **ui:** карточка подписки не уезжает за край на телефоне ([db7344c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/db7344c0ccfbc80af29446017f9b07309ed96abb))
+
 ## [1.71.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.0...v1.71.1) (2026-09-08)
 
 

@@ -2040,7 +2040,7 @@
         "enabled": "Enabled",
         "disabled": "Disabled",
         "success": "Success",
-        "runAutoSyncNow": "Run Auto Sync Now",
+        "runAutoSyncNow": "Full sync now",
         "fromPanel": "From Panel",
         "fromPanelDesc": "Import users from Remnawave to bot",
         "toPanel": "To Panel",
@@ -2052,7 +2052,8 @@
       "kinds": {
         "probe": "probe",
         "vless": "VLESS test",
-        "scan": "scan /24"
+        "scan": "scan /24",
+        "geo": "GEO from cities"
       },
       "status": {
         "openSettings": "Open settings",
@@ -2128,7 +2129,11 @@
         "summaryServers_other": "{{count}} servers",
         "busyBatch": "A server check is already running — wait for it",
         "timeRow": "Time",
-        "confirmServers": "Servers ({{count}}): {{list}}"
+        "confirmServers": "Servers ({{count}}): {{list}}",
+        "runGeo_one": "Check {{count}} city · {{price}}",
+        "runGeo_other": "Check {{count}} cities · {{price}}",
+        "runShortGeo_one": "Check {{count}} city",
+        "runShortGeo_other": "Check {{count}} cities"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2146,7 +2151,8 @@
         "units": "SIMs",
         "waitingUnit": "waiting…",
         "answered": "{{answered}} of {{total}} SIMs answered",
-        "canLeave": "You can close the page: the result will appear in “My checks”."
+        "canLeave": "You can close the page: the result will appear in “My checks”.",
+        "hintGeo": "Sites: half a second per city, tunnel: two to three seconds; cities run in parallel. The page updates by itself."
       },
       "verdict": {
         "reachable": "reachable",
@@ -2208,10 +2214,15 @@
         "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · subscription URL · base64 — one link per line",
         "loading": "Loading subscription…",
         "parseFailed": "Could not parse",
+        "notLoaded": "Subscription not loaded",
+        "noteTitle": "Subscription",
         "sourceLinks": "links · {{count}}",
         "sourceSubscription": "subscription · {{count}}",
         "pickAll": "All",
         "pickNone": "Reset",
+        "filter": "Find by name or address",
+        "filterNone": "Nothing found",
+        "filterShown": "showing {{shown}} of {{total}}",
         "orPick": "Or your own config / another subscription",
         "fromInput": "showing configs from the field above",
         "selectedOf": "selected {{selected}} / {{total}}",
@@ -2364,7 +2375,9 @@
         "vless": "VPN test",
         "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
         "history": "History",
-        "historyHint": "every check: what was checked, the outcome and the charge"
+        "historyHint": "every check: what was checked, the outcome and the charge",
+        "geo": "GEO",
+        "geoHint": "from Russian cities through home and mobile ISPs, up to 20 targets and one config"
       },
       "sections": {
         "targets": "Targets",
@@ -2383,7 +2396,7 @@
           "time": "Time",
           "cost": "Charged",
           "outcome": "Outcome",
-          "units": "SIMs"
+          "units": "From"
         },
         "outcome": {
           "ok": "all reachable",
@@ -2406,7 +2419,9 @@
           "pending": "Check in progress",
           "scan": "Alive addresses: {{ok}} of {{total}}",
           "empty": "No result",
-          "blockedList": "Blocked or no answer: {{list}}"
+          "blockedList": "Blocked or no answer: {{list}}",
+          "geo_one": "Works in {{ok}} of {{total}} city",
+          "geo_other": "Works in {{ok}} of {{total}} cities"
         },
         "batchTargets_one": "{{count}} server",
         "batchTargets_other": "{{count}} servers",
@@ -2485,6 +2500,136 @@
         "pickDistrict": "All SIMs in {{code}}",
         "unpickDistrict": "Clear SIMs in {{code}}",
         "empty": "No SIMs: service unavailable"
+      },
+      "geo": {
+        "targets": {
+          "count": "{{count}} of {{max}} targets",
+          "overLimit": "No more than {{max}} targets per run — drop the extra ones",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — comma-separated or one per line",
+          "hint": "Domain, IP, address with port or a site link. GEO does not check subnets.",
+          "noCidr": "A subnet cannot be checked here — that is the “CIDR scan” tab",
+          "configTitle": "Tunnel config",
+          "configHint": "one server from the panel subscription or a pasted link — vless or hysteria2",
+          "kindLabel": "What to check",
+          "kinds": {
+            "hosts": "Panel hosts",
+            "addresses": "IP / Domain",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave panel servers: up to 20 per run, probe on the server port",
+            "addresses": "IP · IP:port · domain · https://… — comma- or line-separated; subnets are not checked",
+            "vless": "one vless or hysteria2 config from the panel subscription or a pasted link"
+          }
+        },
+        "scope": {
+          "title": "From where",
+          "hint": "network, geography, ISP",
+          "label": "Coverage",
+          "all": "All of Russia",
+          "district": "District",
+          "region": "Region",
+          "cities": "Cities",
+          "pickDistrict": "District",
+          "pickRegion": "— pick a region —",
+          "cityFind": "Find a city…",
+          "cityTruncated": "Not all shown: {{total}} found, refine the name",
+          "removeCity": "Remove city",
+          "isps_one": "{{count}} ISP",
+          "isps_other": "{{count}} ISPs"
+        },
+        "network": {
+          "label": "Network",
+          "res": "Home",
+          "mob": "Mobile"
+        },
+        "limit": {
+          "label": "Cities · top by population",
+          "all": "all"
+        },
+        "isp": {
+          "label": "ISP",
+          "any": "Any (random in the city)",
+          "all": "One probe per ISP in each city",
+          "allNeedsScope": "Only with a district, a region or a list of cities"
+        },
+        "method": {
+          "title": "Method",
+          "label": "Probe",
+          "tcp": "TCP port",
+          "tls": "TLS handshake",
+          "tcpHint": "the port accepts a connection",
+          "tlsHint": "the site really opens",
+          "hostsHint": "For a VPN host TLS without the right SNI shows a false refusal — panel hosts default to TCP",
+          "heavy": "Heavy probe: TSPU throttling detection",
+          "heavyHint": "transfers >16 KB per target; domains only; ≈ +0.055 MB per target in every city"
+        },
+        "verdicts": {
+          "ok": "works",
+          "partial": "partial",
+          "throttled": "throttled",
+          "blocked": "blocked (confirmed)",
+          "unconfirmed": "unconfirmed — repeat",
+          "exit_bad": "ISP line did not answer (not a result)",
+          "target_error": "target answers with an error",
+          "no_ru_node": "no RU node",
+          "no_udp": "exit without UDP (hy2)",
+          "port_blocked": "port cannot be checked (forbidden by the proxy network)"
+        },
+        "result": {
+          "progress": "{{done}} of {{total}} done",
+          "noise": "not a result: {{count}}",
+          "find": "Find a city or region…",
+          "cities_one": "{{count}} city",
+          "cities_other": "{{count}} cities",
+          "picked": "On the map: {{label}} · {{count}}",
+          "pickedClear": "Show all"
+        },
+        "rows": {
+          "city": "City",
+          "provider": "ISP",
+          "empty": "No city matches the filter",
+          "notChecked": "not checked: {{reason}}",
+          "latency": "{{value}} ms",
+          "kbps": "{{value}} kbps",
+          "froze": "freeze",
+          "recheck": "Repeat",
+          "tags": {
+            "newExit": "new exit",
+            "newExitTitle": "another exit after a re-check — the previous row is kept",
+            "exitChanged": "exit changed",
+            "exitChangedTitle": "the same exit was requested, the proxy swapped it",
+            "flaky": "2nd attempt",
+            "flakyTitle": "the first probe failed, a repeat from the same exit succeeded; the operator line flickers"
+          }
+        },
+        "launch": {
+          "citiesRow": "Cities",
+          "maxNodes": "mode cap {{count}}",
+          "applyLimit": "Set the cap to {{count}}",
+          "confirmCities": "Cities: {{count}}"
+        },
+        "fromHost": "Check from Russian cities",
+        "map": {
+          "close": "Close",
+          "noCities": "no cities in this check",
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out",
+          "reset": "Whole map",
+          "more": "{{count}} more"
+        },
+        "recheck": {
+          "sameIp": "Same IP",
+          "newIp": "Change IP",
+          "busy": "Checking…",
+          "done": "Re-checked",
+          "doneTitle": "this row was re-checked — the fresh result is a separate row",
+          "sameIpNoSid": "Repeat the check (the exit is picked anew)",
+          "sameIpHold": "Repeat through the SAME IP {{ip}} — the exit is held for ~{{seconds}} s more",
+          "sameIpExpired": "Repeat through the same IP {{ip}} — the hold has expired; if the proxy swaps the exit the row is marked \"exit changed\"",
+          "newIpTitle": "Change IP: another exit / provider in this city. This row stays, a new one is added with a tag",
+          "failed": "Could not start the re-check"
+        }
       }
     },
     "wheel": {
@@ -2948,7 +3093,7 @@
     },
     "graceAccess": {
       "title": "Grace access",
-      "subtitle": "Temporary restricted access so a user can still renew",
+      "subtitle": "The subscription ended, but what matters stays reachable so the user can renew",
       "loadError": "Could not load grace access settings",
       "saveError": "Could not save the settings",
       "save": "Save",
@@ -2970,19 +3115,19 @@
       "modes": {
         "false": {
           "label": "Off",
-          "desc": "No grace sessions are granted or finished"
+          "desc": "Grace does not run. Switch here only when no sessions are open — otherwise people stay in the grace squad forever"
         },
         "observe": {
           "label": "Observe",
-          "desc": "Candidates are only logged, the panel is left alone"
+          "desc": "Dry run: the bot only logs who would get grace. The panel is untouched, nobody gets access"
         },
         "true": {
           "label": "On",
-          "desc": "Grants temporary access and restores it afterwards"
+          "desc": "Live: grants temporary access, watches it and puts everything back after payment or when the time is up"
         },
         "drain": {
           "label": "Drain",
-          "desc": "No new sessions, the open ones are seen through"
+          "desc": "Gentle shutdown: nothing new is granted, existing sessions run until payment or their deadline. Then switch to “Off”"
         }
       },
       "restart": {
@@ -2999,7 +3144,8 @@
         "traffic_required": "The traffic limit must be at least 1 GB",
         "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”.",
         "number_required": "Number is empty: {{field}}",
-        "mode_invalid": "An unknown mode is stored. The bot fails on it at startup and leaves grace disabled — pick a mode again."
+        "mode_invalid": "An unknown mode is stored. The bot fails on it at startup and leaves grace disabled — pick a mode again.",
+        "allowed_required": "Say what stays reachable: without it the user message makes no sense"
       },
       "fields": {
         "mode": "Mode",
@@ -3010,49 +3156,64 @@
         "traffic_gb": "Traffic, GB",
         "reconcile_interval_seconds": "Reconcile interval, sec",
         "reconcile_batch_size": "Batch size",
-        "candidate_lookback_minutes": "Lookback window, min"
+        "candidate_lookback_minutes": "Lookback window, min",
+        "allowed_services": "What stays reachable",
+        "notify_admins": "Notify admins",
+        "notify_user": "Tell the user"
       },
       "squads": {
         "title": "Squads",
-        "hint": "Where the user is moved for the duration of grace. The original state is snapshotted and restored at the end.",
+        "hint": "The list comes from the panel, like the “Squads” section. The bot temporarily moves the account into the chosen squad; letting only Telegram through it is up to the network on the nodes — the bot does not restrict it. The same squad may serve both cases; the original squads are snapshotted and restored at the end.",
         "choose": "Pick a squad",
-        "manual": "Enter a UUID manually…",
+        "manual": "Enter an identifier manually…",
         "members": "{{n}} members",
-        "unavailable": "The panel is unreachable — enter the UUID manually",
-        "expiredDesc": "Used when the subscription has expired",
-        "limitedDesc": "Used when the traffic limit is exhausted"
+        "unavailable": "The panel is not responding and squads have not been synced yet — the identifier has to be entered manually",
+        "expiredDesc": "When the subscription period has ended",
+        "limitedDesc": "When the traffic limit is exhausted",
+        "synced": "The panel is not responding — showing the last synced list"
       },
       "external": {
-        "detach": "Detach",
-        "keep": "Leave as is",
-        "custom": "Fallback squad",
-        "detachDesc": "The external squad is removed for the grace period and restored afterwards",
-        "keepDesc": "The external squad is left untouched",
-        "customDesc": "The chosen squad is used for the grace period"
+        "detach": "Detach for grace",
+        "keep": "Leave untouched",
+        "custom": "Replace with a chosen one",
+        "detachDesc": "The account’s external squad is removed so access goes only through the grace squad, and restored at the end",
+        "keepDesc": "The account’s external squad stays as is — access through it is not restricted",
+        "customDesc": "The chosen external squad is assigned for the grace period, then the previous one is restored",
+        "hint": "An external squad in the panel is a separate subscription profile with other hosts and templates (for example, for censorship workarounds). If you do not use them, keep “Detach for grace”.",
+        "squad": "Which external squad to assign",
+        "unavailable": "The panel is not responding — the external squad identifier has to be typed by hand"
       },
       "limits": {
-        "title": "Limits",
-        "durationDesc": "How long access lasts if the subscription is never renewed",
-        "trafficDesc": "Traffic limit for the grace period"
+        "title": "What the user gets",
+        "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
+        "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
+        "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad.",
+        "allowedDesc": "How the user will see it in the bot message and the email: “only this stays available: …”. What the grace squad really lets through is up to the nodes — the bot only says so.",
+        "allowedPlaceholder": "Telegram and the dashboard"
       },
       "coverage": {
-        "title": "Who gets it",
-        "hint": "By default only paid subscriptions receive grace.",
-        "trial_enabled": "Trial subscriptions",
-        "trial_enabledDesc": "Grant grace after a trial ends",
-        "daily_enabled": "Daily subscriptions",
-        "daily_enabledDesc": "Grant grace to per-day subscriptions",
-        "free_enabled": "Free subscriptions",
-        "free_enabledDesc": "Grant grace to zero-cost subscriptions"
+        "title": "Which subscriptions get it",
+        "hint": "The kind is derived from the tariff: trial → daily → free → regular paid.",
+        "trial_enabled": "Trial period",
+        "trial_enabledDesc": "After a free trial period ends",
+        "daily_enabled": "Daily tariffs",
+        "daily_enabledDesc": "Tariffs charged per day",
+        "free_enabled": "Free tariffs",
+        "free_enabledDesc": "Tariffs with a zero price",
+        "paid": "Paid tariffs",
+        "paidDesc": "Regular paid subscriptions — always, while the mode is on",
+        "always": "Always"
       },
       "reconcile": {
-        "title": "Background reconciliation",
-        "hint": "How often the bot looks for candidates and finishes open sessions",
+        "title": "Advanced",
+        "hint": "External squad and background reconciliation — rarely changed",
         "show": "Show",
         "hide": "Hide",
         "reconcile_interval_secondsDesc": "Pause between reconciliation passes",
         "reconcile_batch_sizeDesc": "How many sessions one pass handles",
-        "candidate_lookback_minutesDesc": "How far back recent expirations and limits are searched"
+        "candidate_lookback_minutesDesc": "How far back recent expirations and limits are searched",
+        "background": "Background reconciliation",
+        "backgroundHint": "How often the bot looks for candidates and finishes open sessions"
       },
       "health": {
         "title": "Health",
@@ -3061,7 +3222,9 @@
         "openErrors": "Errors in open",
         "completedErrors": "Errors in completed",
         "recentErrors": "Recent errors",
-        "subscription": "Subscription #{{id}}"
+        "subscription": "Subscription #{{id}}",
+        "withErrors": "errors: {{n}}",
+        "noErrors": "no errors"
       },
       "sessions": {
         "title": "Sessions",
@@ -3102,6 +3265,14 @@
       "fullyLocked": {
         "title": "This section is read-only",
         "body": "Every grace setting is pinned in .env, so the file shadows the database and edits made here would not apply. Remove the GRACE_ACCESS_* lines from .env and restart the bot to manage them from here."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "hint": "Who is told when grace is granted and when it ends. Emails are edited in “Email templates”.",
+        "notify_admins": "Admins in the notification chat",
+        "notify_adminsDesc": "Who got it, why, until when and how it ended — in the “Renewals” category",
+        "notify_user": "The user in the bot and by email",
+        "notify_userDesc": "The subscription ended but access to what is named above is kept for a while, with a renew button; and when that access closes"
       }
     },
     "bulkActions": {
@@ -3554,7 +3725,11 @@
         "trafficPackagesRequired": "Add at least one traffic package (or disable traffic topup)"
       },
       "lavaProductLabel": "Lava product (auto-renewal)",
-      "lavaProductDesc": "Product UUID from the Lava dashboard: price and charge period are configured there. Empty — auto-renewal is unavailable for this tariff."
+      "lavaProductDesc": "Product UUID from the Lava dashboard: price and charge period are configured there. Empty — auto-renewal is unavailable for this tariff.",
+      "panelTagLabel": "Remnawave panel tag",
+      "panelTagDesc": "Up to 16 characters: Latin letters, digits and underscore. Empty — the global tag from settings (trial or paid). The tag shows in the panel which tariff a user is on.",
+      "trialDaysLabel": "Trial days on this tariff",
+      "trialDaysDesc": "Empty — the global trial duration setting."
     },
     "servers": {
       "title": "Squad Management",
@@ -4211,7 +4386,8 @@
         "active": "Active",
         "withSubscription": "With subscription",
         "newToday": "New today",
-        "blocked": "Blocked"
+        "blocked": "Blocked",
+        "deleted": "Deleted"
       },
       "status": {
         "active": "Active",
@@ -4302,7 +4478,6 @@
         "language": "Language",
         "registration": "Registration",
         "lastActivity": "Last activity",
-        "botActivity": "Bot activity",
         "cabinetLastLogin": "Last cabinet login",
         "vpnConnection": "VPN connection",
         "lastConnection": "Last connection",
@@ -4533,11 +4708,16 @@
             "cabinet_login": "Cabinet login",
             "withdrawal": "Withdrawal request",
             "button_click": "Bot button",
-            "cabinet_action": "Cabinet action"
+            "cabinet_action": "Cabinet action",
+            "miniapp_action": "Mini App action",
+            "screen": "Opened screen",
+            "click": "Clicked",
+            "message": "Message to bot"
           },
           "sources": {
             "bot": "Bot",
-            "cabinet": "Cabinet"
+            "cabinet": "Cabinet",
+            "miniapp": "Mini App"
           },
           "subtypes": {
             "deposit": "Deposit",
@@ -4566,7 +4746,92 @@
             "approved": "Approved",
             "rejected": "Rejected",
             "completed": "Completed",
-            "command": "Command"
+            "command": "Command",
+            "payment": "Payment",
+            "screen": "Screen",
+            "click": "Click",
+            "message": "Message"
+          },
+          "screens": {
+            "dashboard": "Home",
+            "subscription": "Subscription",
+            "purchase": "Subscription purchase",
+            "renew": "Renewal",
+            "balance": "Balance",
+            "topUp": "Top-up",
+            "topUpResult": "Payment result",
+            "savedCards": "Saved cards",
+            "buy": "Purchase page",
+            "connection": "Connection",
+            "contests": "Contests",
+            "coupon": "Coupon",
+            "gift": "Gift",
+            "info": "Information",
+            "news": "News article",
+            "offer": "Public offer",
+            "privacy": "Privacy policy",
+            "polls": "Polls",
+            "profile": "Profile",
+            "accounts": "Linked accounts",
+            "recurrentPayments": "Recurring payments",
+            "referral": "Referrals",
+            "partnerApply": "Partner application",
+            "withdrawalRequest": "Withdrawal request",
+            "support": "Support",
+            "wheel": "Wheel of fortune",
+            "login": "Login",
+            "merge": "Account merge",
+            "verifyEmail": "Email verification",
+            "resetPassword": "Password reset",
+            "tariffs": "Tariffs",
+            "tariffSwitch": "Tariff switch",
+            "subscriptionSettings": "Subscription settings",
+            "paymentStatus": "Payment status",
+            "maintenance": "Maintenance"
+          },
+          "actions": {
+            "trial": "Trial activation",
+            "purchase": "Subscription purchase",
+            "purchaseTariff": "Tariff purchase",
+            "renew": "Subscription renewal",
+            "topUp": "Balance top-up",
+            "traffic": "Traffic purchase",
+            "devices": "Device change",
+            "devicePurchase": "Device purchase",
+            "deviceReduce": "Device reduction",
+            "deviceRemove": "Device removal",
+            "deviceRename": "Device rename",
+            "countries": "Server change",
+            "pause": "Subscription pause",
+            "refreshTraffic": "Traffic reset",
+            "revoke": "Key reissue",
+            "tariffSwitch": "Tariff switch",
+            "autopay": "Auto-renewal setting",
+            "recurrentEnable": "Auto-payment enabled",
+            "recurrentCancel": "Auto-payment cancelled",
+            "recurrentPurchase": "Purchase with auto-payment",
+            "subscriptionDelete": "Subscription deletion",
+            "promocode": "Promo code activation",
+            "promocodeDeactivate": "Promo code deactivation",
+            "promoOffer": "Promo offer claimed",
+            "ticket": "New ticket",
+            "ticketMessage": "Ticket message",
+            "logout": "Logout",
+            "wheelSpin": "Wheel spin"
+          },
+          "messageKinds": {
+            "text": "text",
+            "photo": "photo",
+            "document": "file",
+            "video": "video",
+            "video_note": "video note",
+            "voice": "voice",
+            "audio": "audio",
+            "sticker": "sticker",
+            "animation": "GIF",
+            "contact": "contact",
+            "location": "location",
+            "other": "message"
           }
         }
       },
@@ -5863,6 +6128,7 @@
       "unlink": "Disconnect",
       "unlinkConfirm": "Are you sure? You won't be able to sign in with this service after disconnecting.",
       "unlinkConfirmBtn": "Confirm disconnect?",
+      "unlinkForgetsEmail": "The email {{email}} will be forgotten with it: it came from this service and no password is set for email sign-in.",
       "cannotUnlinkLast": "Cannot disconnect the last sign-in method",
       "linkSuccess": "Account connected successfully",
       "unlinkSuccess": "Account disconnected successfully",

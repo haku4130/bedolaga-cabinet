@@ -37,7 +37,9 @@ import {
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BackgroundHost } from './components/backgrounds/BackgroundHost';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
+import { RemountOnParam } from '@/components/RemountOnParam';
 import { saveReturnUrl } from './utils/token';
+import { ScreenViewReporter } from './components/ScreenViewReporter';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
 import { useSiteVerification } from './hooks/useSiteVerification';
 import { useDoneKey } from './hooks/useDoneKey';
@@ -194,7 +196,18 @@ function ProtectedRoute({
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  return withLayout ? <Layout>{children}</Layout> : <>{children}</>;
+  // След пользователя: каждый открытый экран уходит в «Активность» его карточки.
+  return withLayout ? (
+    <Layout>
+      <ScreenViewReporter />
+      {children}
+    </Layout>
+  ) : (
+    <>
+      <ScreenViewReporter />
+      {children}
+    </>
+  );
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -1095,7 +1108,9 @@ function App() {
           element={
             <PermissionRoute permission="partners:read">
               <LazyPage>
-                <AdminPartnerDetail />
+                <RemountOnParam name="userId">
+                  <AdminPartnerDetail />
+                </RemountOnParam>
               </LazyPage>
             </PermissionRoute>
           }
@@ -1285,7 +1300,9 @@ function App() {
           element={
             <PermissionRoute permission="users:read">
               <LazyPage>
-                <AdminUserDetail />
+                <RemountOnParam name="id">
+                  <AdminUserDetail />
+                </RemountOnParam>
               </LazyPage>
             </PermissionRoute>
           }
