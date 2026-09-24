@@ -12,6 +12,7 @@ import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
 import { pickBestValue } from '../../../utils/bestValue';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
+import { useCheckout } from '../../../hooks/useCheckout';
 import type { Tariff, TariffPeriod } from '../../../types';
 import { BestValueBadge } from '../BestValueBadge';
 
@@ -79,29 +80,32 @@ export function TariffPurchaseForm({
   const [useCustomDays, setUseCustomDays] = useState(false);
   const [useCustomTraffic, setUseCustomTraffic] = useState(false);
 
+  const isDailyTariff = Boolean(
+    tariff.is_daily || (tariff.daily_price_kopeks && tariff.daily_price_kopeks > 0),
+  );
+  const selectedDays = () =>
+    isDailyTariff ? 1 : useCustomDays ? customDays : selectedTariffPeriod?.days || 30;
+  const selectedTrafficGb = () =>
+    useCustomTraffic && tariff.custom_traffic_enabled ? customTrafficGb : undefined;
+  const selectedPeriodLabel = () =>
+    useCustomDays
+      ? t('subscription.days', { count: customDays })
+      : (selectedTariffPeriod?.label ?? '');
+  // Forward the subscription_id when the user landed here via the
+  // "Renew this subscription" flow (?subscriptionId=N). The backend
+  // uses it to resolve the exact target row by ID, avoiding the
+  // race with concurrent panel webhooks that would otherwise hit
+  // the partial UNIQUE on uq_subscriptions_user_tariff_active.
+  const purchaseSelected = () =>
+    subscriptionApi.purchaseTariff(
+      tariff.id,
+      selectedDays(),
+      selectedTrafficGb(),
+      subscriptionId ?? undefined,
+    );
+
   const purchaseMutation = useMutation({
-    mutationFn: () => {
-      const isDailyTariff =
-        tariff.is_daily || (tariff.daily_price_kopeks && tariff.daily_price_kopeks > 0);
-      const days = isDailyTariff
-        ? 1
-        : useCustomDays
-          ? customDays
-          : selectedTariffPeriod?.days || 30;
-      const trafficGb =
-        useCustomTraffic && tariff.custom_traffic_enabled ? customTrafficGb : undefined;
-      // Forward the subscription_id when the user landed here via the
-      // "Renew this subscription" flow (?subscriptionId=N). The backend
-      // uses it to resolve the exact target row by ID, avoiding the
-      // race with concurrent panel webhooks that would otherwise hit
-      // the partial UNIQUE on uq_subscriptions_user_tariff_active.
-      return subscriptionApi.purchaseTariff(
-        tariff.id,
-        days,
-        trafficGb,
-        subscriptionId ?? undefined,
-      );
-    },
+    mutationFn: purchaseSelected,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
@@ -109,6 +113,10 @@ export function TariffPurchaseForm({
       navigate('/subscriptions', { replace: true });
     },
   });
+
+  // Обычные тарифы: «Оплатить» — с баланса или недостающее у провайдера.
+  // Суточные идут через purchaseMutation: они и должны списываться с баланса.
+  const checkout = useCheckout();
 
   // СБП-оформление: первое списание = подтверждение привязки в банке; период
   // на форме не участвует — списания идут по каденс-правилу тарифа.
@@ -130,7 +138,7 @@ export function TariffPurchaseForm({
     <>
       <button
         onClick={() => sbpPurchaseMutation.mutate()}
-        disabled={sbpPurchaseMutation.isPending || purchaseMutation.isPending}
+        disabled={sbpPurchaseMutation.isPending || purchaseMutation.isPending || checkout.isPending}
         className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
       >
         {sbpPurchaseMutation.isPending ? (
@@ -171,7 +179,9 @@ export function TariffPurchaseForm({
     <>
       <button
         onClick={() => lavaPurchaseMutation.mutate()}
-        disabled={lavaPurchaseMutation.isPending || purchaseMutation.isPending}
+        disabled={
+          lavaPurchaseMutation.isPending || purchaseMutation.isPending || checkout.isPending
+        }
         className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
       >
         {lavaPurchaseMutation.isPending ? (
@@ -733,20 +743,56 @@ export function TariffPurchaseForm({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => purchaseMutation.mutate()}
-                      disabled={purchaseMutation.isPending}
-                      className="btn-primary w-full py-3"
-                    >
-                      {purchaseMutation.isPending ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                          {t('common.loading')}
-                        </span>
-                      ) : (
-                        t('subscription.purchase')
-                      )}
-                    </button>
+                    {(() => {
+                      const fromBalance = Math.min(balanceKopeks ?? 0, totalPrice);
+                      const toPay = totalPrice - fromBalance;
+                      return (
+                        <>
+                          {fromBalance > 0 && toPay > 0 && (
+                            <div className="mb-4 space-y-1 text-sm">
+                              <div className="flex justify-between text-dark-300">
+                                <span>{t('checkout.fromBalance')}</span>
+                                <span>−{formatPrice(fromBalance)}</span>
+                              </div>
+                              <div className="flex justify-between font-medium text-dark-100">
+                                <span>{t('checkout.toPay')}</span>
+                                <span>{formatPrice(toPay)}</span>
+                              </div>
+                            </div>
+                          )}
+                          <button
+                            onClick={() =>
+                              checkout.start({
+                                kind: 'purchase',
+                                tariffId: tariff.id,
+                                subscriptionId: subscriptionId ?? null,
+                                periodDays: selectedDays(),
+                                trafficGb: selectedTrafficGb() ?? null,
+                                label: `${tariff.name} · ${selectedPeriodLabel()}`,
+                                priceKopeks: totalPrice,
+                                pay: purchaseSelected,
+                              })
+                            }
+                            disabled={checkout.isPending}
+                            className="btn-primary w-full py-3"
+                          >
+                            {checkout.isPending ? (
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                {t('common.loading')}
+                              </span>
+                            ) : toPay > 0 ? (
+                              t('checkout.pay', { amount: formatPrice(toPay) })
+                            ) : (
+                              t('checkout.payFromBalance', { amount: formatPrice(totalPrice) })
+                            )}
+                          </button>
+                          <p className="mt-2 text-center text-xs text-dark-400">
+                            {t('checkout.autoActivateHint')}
+                          </p>
+                        </>
+                      );
+                    })()}
 
                     {sbpPurchaseButton}
                     {lavaPurchaseButton}
@@ -754,19 +800,9 @@ export function TariffPurchaseForm({
                 );
               })()}
 
-              {purchaseMutation.isError && !getInsufficientBalanceError(purchaseMutation.error) && (
+              {checkout.error != null && (
                 <div className="mt-3 text-center text-sm text-error-400">
-                  {getErrorMessage(purchaseMutation.error)}
-                </div>
-              )}
-              {purchaseMutation.isError && getInsufficientBalanceError(purchaseMutation.error) && (
-                <div className="mt-3">
-                  <InsufficientBalancePrompt
-                    missingAmountKopeks={
-                      getInsufficientBalanceError(purchaseMutation.error)?.missingAmount || 0
-                    }
-                    compact
-                  />
+                  {getErrorMessage(checkout.error)}
                 </div>
               )}
             </div>

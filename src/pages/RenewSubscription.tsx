@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
@@ -9,7 +9,8 @@ import { getMonthlyPriceKopeks } from '../utils/pricing';
 import { pickBestValue } from '../utils/bestValue';
 import { useCurrency } from '../hooks/useCurrency';
 import { useHaptic } from '../platform';
-import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
+import { useCheckout } from '../hooks/useCheckout';
+import { getErrorMessage } from '../utils/subscriptionHelpers';
 import { WebBackButton } from '../components/WebBackButton';
 import { BEST_VALUE_BORDER, BestValueBadge } from '../components/subscription/BestValueBadge';
 import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
@@ -19,15 +20,12 @@ export default function RenewSubscription() {
   const subId = subscriptionId ? Number(subscriptionId) : undefined;
 
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
   const { formatAmount, currencySymbol } = useCurrency();
   const { impact } = useHaptic();
 
   const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   // Load subscription detail for tariff name
   const { data: subscriptionResponse } = useQuery({
@@ -63,36 +61,23 @@ export default function RenewSubscription() {
   });
   const balanceKopeks = purchaseOptions?.balance_kopeks ?? 0;
 
-  const renewMutation = useMutation({
-    mutationFn: (periodDays: number) => subscriptionApi.renewSubscription(periodDays, subId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', subId] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      queryClient.invalidateQueries({ queryKey: ['renewal-options', subId] });
-      queryClient.invalidateQueries({ queryKey: ['balance'] });
-      navigate(`/subscriptions/${subId}`, { replace: true });
-    },
-    onError: (err: unknown) => {
-      const detail =
-        err && typeof err === 'object' && 'response' in err
-          ? ((err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail ?? null)
-          : null;
-
-      if (detail && typeof detail === 'object' && 'code' in (detail as Record<string, unknown>)) {
-        const typed = detail as { code: string; missing_amount?: number };
-        if (typed.code === 'insufficient_funds' && typed.missing_amount) {
-          setError(`insufficient:${typed.missing_amount}`);
-          return;
-        }
-      }
-      setError(typeof detail === 'string' ? detail : t('common.error'));
-    },
-  });
+  // «Оплатить»: с баланса или недостающее у провайдера — без «пополните баланс».
+  const checkout = useCheckout();
 
   const handleRenew = (periodDays: number) => {
+    const option = options?.find((item) => item.period_days === periodDays);
+    if (!option || !subId) return;
     impact('medium');
-    setError(null);
-    renewMutation.mutate(periodDays);
+    checkout.start({
+      kind: 'renew',
+      tariffId: subscription?.tariff_id ?? null,
+      subscriptionId: subId,
+      periodDays,
+      trafficGb: null,
+      label: `${subscription?.tariff_name ?? t('subscription.defaultName', 'Подписка')} · ${t('subscription.days', { count: periodDays })}`,
+      priceKopeks: option.price_kopeks,
+      pay: () => subscriptionApi.renewSubscription(periodDays, subId),
+    });
   };
 
   if (!subId) {
@@ -109,9 +94,6 @@ export default function RenewSubscription() {
       </PageSkeleton>
     );
   }
-
-  const insufficientMatch = error?.match(/^insufficient:(\d+)$/);
-  const missingAmount = insufficientMatch ? Number(insufficientMatch[1]) : null;
 
   return (
     <div className="space-y-5">
@@ -157,7 +139,6 @@ export default function RenewSubscription() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {options.map((option) => {
             const isSelected = selectedPeriod === option.period_days;
-            const canAfford = balanceKopeks >= option.price_kopeks;
             const perMonth = getMonthlyPriceKopeks(option.price_kopeks, option.period_days);
             // Выбранный вариант важнее подсказки: рамка выделения уступает
             // рамке выбора, чтобы не было двух «активных» карточек сразу.
@@ -169,7 +150,7 @@ export default function RenewSubscription() {
                 onClick={() => {
                   impact('light');
                   setSelectedPeriod(option.period_days);
-                  setError(null);
+                  checkout.reset();
                 }}
                 className={`w-full rounded-2xl p-4 text-left transition-all duration-200 ${
                   isBestValue ? 'border-2' : 'border'
@@ -225,45 +206,44 @@ export default function RenewSubscription() {
                     )}
                   </div>
                 </div>
-                {!canAfford && (
-                  <div className="mt-1 text-[11px] text-error-400">
-                    {t(
-                      'subscription.insufficientBalanceAmount',
-                      'Недостаточно средств. Не хватает {{missing}}',
-                      {
-                        missing: `${formatAmount((option.price_kopeks - balanceKopeks) / 100)} ${currencySymbol}`,
-                      },
-                    )}
-                  </div>
-                )}
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Insufficient balance prompt */}
-      {missingAmount && <InsufficientBalancePrompt missingAmountKopeks={missingAmount} compact />}
-
-      {/* Error */}
-      {error && !missingAmount && (
+      {checkout.error != null && (
         <div className="rounded-xl bg-error-400/10 p-3 text-center text-sm text-error-400">
-          {error}
+          {getErrorMessage(checkout.error)}
         </div>
       )}
 
       {/* Renew button */}
-      {selectedPeriod && (
-        <button
-          onClick={() => handleRenew(selectedPeriod)}
-          disabled={renewMutation.isPending}
-          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
-        >
-          {renewMutation.isPending
-            ? t('common.processing', 'Обработка...')
-            : t('subscription.extend', 'Продлить подписку')}
-        </button>
-      )}
+      {selectedPeriod &&
+        (() => {
+          const option = options?.find((item) => item.period_days === selectedPeriod);
+          const total = option?.price_kopeks ?? 0;
+          const toPay = Math.max(0, total - balanceKopeks);
+          const amount = (kopeks: number) => `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+          return (
+            <div className="space-y-2">
+              <button
+                onClick={() => handleRenew(selectedPeriod)}
+                disabled={checkout.isPending}
+                className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+              >
+                {checkout.isPending
+                  ? t('common.processing', 'Обработка...')
+                  : toPay > 0
+                    ? t('checkout.pay', { amount: amount(toPay) })
+                    : t('checkout.payFromBalance', { amount: amount(total) })}
+              </button>
+              <p className="text-center text-xs" style={{ color: g.textSecondary }}>
+                {t('checkout.autoActivateHint')}
+              </p>
+            </div>
+          );
+        })()}
     </div>
   );
 }
