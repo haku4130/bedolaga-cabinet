@@ -533,12 +533,7 @@ export default function Subscription() {
       {/* Page title */}
       <div className="flex items-center gap-3">
         <WebBackButton to={isMultiTariff ? '/subscriptions' : '/'} />
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('manage.title')}</h1>
-          {subscription?.tariff_name && (
-            <p className="mt-0.5 truncate text-sm text-dark-400">{subscription.tariff_name}</p>
-          )}
-        </div>
+        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('manage.title')}</h1>
       </div>
 
       {/* Current Subscription */}
@@ -765,7 +760,7 @@ export default function Subscription() {
 
               {/* ─── Traffic Progress ─── */}
               {!isUnlimited && (
-                <div className="mb-6">
+                <div className="mt-6">
                   <div className="mb-2.5 flex items-center justify-between">
                     <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
                       {t('subscription.traffic')}
@@ -852,11 +847,6 @@ export default function Subscription() {
                   <div>
                     <div className="text-sm font-semibold text-dark-50">
                       {t('subscription.autoRenewal')}
-                    </div>
-                    <div className="mt-0.5 text-[11px] text-dark-400">
-                      {t('subscription.daysBeforeExpiry', {
-                        count: subscription.autopay_days_before,
-                      })}
                     </div>
                   </div>
                   <button

@@ -19,7 +19,7 @@ export function StatusFacts({ subscription: sub, connectedDevices }: StatusFacts
   const used = connectedDevices ?? 0;
 
   return (
-    <div className="mb-6 space-y-3">
+    <div className="space-y-3">
       {!sub.is_daily && (
         <p className="flex flex-wrap items-baseline gap-x-2 text-sm text-dark-300">
           <span className="text-3xl font-extrabold leading-none tracking-tight text-dark-50">
