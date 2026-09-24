@@ -6255,5 +6255,27 @@
     "offer": "پیشنهاد عمومی",
     "privacy": "سیاست حفظ حریم خصوصی",
     "recurrent": "پرداخت‌های مکرر"
+  },
+  "more": {
+    "title": "More",
+    "profileHint": "Profile and sign-in methods",
+    "groups": {
+      "money": "Money",
+      "bonuses": "Bonuses",
+      "info": "Information",
+      "settings": "Settings"
+    },
+    "items": {
+      "balance": "Balance and payment history",
+      "invite": "Invite a friend",
+      "gift": "Gift a subscription",
+      "wheel": "Wheel of fortune",
+      "contests": "Contests",
+      "polls": "Polls",
+      "news": "News and updates",
+      "info": "Guides and FAQ",
+      "language": "Language",
+      "theme": "Theme"
+    }
   }
 }

@@ -6224,5 +6224,27 @@
     "offer": "公开要约",
     "privacy": "隐私政策",
     "recurrent": "定期付款"
+  },
+  "more": {
+    "title": "More",
+    "profileHint": "Profile and sign-in methods",
+    "groups": {
+      "money": "Money",
+      "bonuses": "Bonuses",
+      "info": "Information",
+      "settings": "Settings"
+    },
+    "items": {
+      "balance": "Balance and payment history",
+      "invite": "Invite a friend",
+      "gift": "Gift a subscription",
+      "wheel": "Wheel of fortune",
+      "contests": "Contests",
+      "polls": "Polls",
+      "news": "News and updates",
+      "info": "Guides and FAQ",
+      "language": "Language",
+      "theme": "Theme"
+    }
   }
 }

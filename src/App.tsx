@@ -68,6 +68,8 @@ const Profile = lazyWithRetry(() => import('./pages/Profile'));
 const Contests = lazyWithRetry(() => import('./pages/Contests'));
 const Polls = lazyWithRetry(() => import('./pages/Polls'));
 const Info = lazyWithRetry(() => import('./pages/Info'));
+const More = lazyWithRetry(() => import('./pages/More'));
+const News = lazyWithRetry(() => import('./pages/News'));
 const Wheel = lazyWithRetry(() => import('./pages/Wheel'));
 const GiftSubscription = lazyWithRetry(() => import('./pages/GiftSubscription'));
 const GiftResult = lazyWithRetry(() => import('./pages/GiftResult'));
@@ -571,6 +573,26 @@ function App() {
             <ProtectedRoute>
               <LazyPage>
                 <Info />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/more"
+          element={
+            <ProtectedRoute>
+              <LazyPage>
+                <More />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/news"
+          element={
+            <ProtectedRoute>
+              <LazyPage>
+                <News />
               </LazyPage>
             </ProtectedRoute>
           }
