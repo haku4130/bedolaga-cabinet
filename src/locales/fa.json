@@ -6412,5 +6412,9 @@
       "adminHint": "Add apps in the admin «Apps» section."
     },
     "change": "Change"
+  },
+  "login": {
+    "autoCreate": "No account yet? It will be created automatically.",
+    "botFallback": "Not working? Sign in via the bot"
   }
 }
