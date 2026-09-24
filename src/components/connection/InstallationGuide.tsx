@@ -304,12 +304,16 @@ export default function InstallationGuide({
             </span>
           </span>
           {availablePlatforms.length > 1 && (
-            <label className="relative flex items-center">
-              <span className="sr-only">{t('connect.changePlatform')}</span>
+            // Видимая подпись «Сменить», а под ней прозрачный нативный select:
+            // название платформы уже есть слева, дублировать его незачем.
+            <label className="relative flex min-h-[40px] shrink-0 items-center gap-1 rounded-xl border border-dark-700 bg-dark-800 px-3 text-sm font-medium text-dark-200 transition-colors hover:border-dark-600">
+              <span aria-hidden="true">{t('connect.change')}</span>
+              <ChevronIcon className="h-4 w-4 text-dark-400" />
               <select
                 value={currentPlatformKey}
                 onChange={(e) => handlePlatformChange(e.target.value)}
-                className="appearance-none rounded-xl border border-dark-700 bg-dark-800 py-2 pl-3 pr-8 text-sm font-medium text-dark-200 outline-none transition-colors hover:border-dark-600"
+                aria-label={t('connect.changePlatform')}
+                className="absolute inset-0 cursor-pointer appearance-none opacity-0"
               >
                 {availablePlatforms.map((p) => (
                   <option key={p} value={p}>
@@ -317,9 +321,6 @@ export default function InstallationGuide({
                   </option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-2.5 text-dark-400">
-                <ChevronIcon className="h-4 w-4" />
-              </span>
             </label>
           )}
         </div>

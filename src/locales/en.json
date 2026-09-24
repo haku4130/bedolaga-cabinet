@@ -6913,6 +6913,7 @@
       "desc": "It usually takes a few minutes — this page will refresh by itself.",
       "help": "Contact support",
       "adminHint": "Add apps in the admin «Apps» section."
-    }
+    },
+    "change": "Change"
   }
 }
