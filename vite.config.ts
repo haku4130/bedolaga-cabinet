@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: process.env.DEV_API_TARGET || 'http://localhost:8080',
           changeOrigin: true,
           // Strip /api prefix: /api/cabinet/auth -> /cabinet/auth
           rewrite: (path) => path.replace(/^\/api/, ''),
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
         // /api). Proxy it too so the "service unavailable" detection probe hits the
         // real backend in dev instead of the Vite server (which would mask outages).
         '/health': {
-          target: 'http://localhost:8080',
+          target: process.env.DEV_API_TARGET || 'http://localhost:8080',
           changeOrigin: true,
         },
       },
