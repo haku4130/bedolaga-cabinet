@@ -9,6 +9,7 @@ export function TimelineBlock({
   getLocalizedText,
   getSvgHtml,
   renderBlockButtons,
+  stepLabel,
 }: BlockRendererProps) {
   const visibleBlocks = blocks.filter(
     (b) =>
@@ -42,6 +43,11 @@ export function TimelineBlock({
             </div>
             {/* Right column: content */}
             <div className={`min-w-0 flex-1 ${isLast ? '' : 'pb-6'}`}>
+              {stepLabel && (
+                <p className="mb-0.5 text-xs font-semibold text-accent-400">
+                  {stepLabel(index, visibleBlocks.length)}
+                </p>
+              )}
               <h3 className="font-semibold text-dark-100">{getLocalizedText(block.title)}</h3>
               <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-dark-400">
                 {getLocalizedText(block.description)}

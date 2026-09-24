@@ -19,4 +19,6 @@ export interface BlockRendererProps {
     buttons: RemnawaveButtonClient[] | undefined,
     variant: 'light' | 'subtle',
   ) => React.ReactNode;
+  /** «Шаг N из M» над заголовком блока; без него блоки рисуются как раньше. */
+  stepLabel?: (index: number, total: number) => string;
 }

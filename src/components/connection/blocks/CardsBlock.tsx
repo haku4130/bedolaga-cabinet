@@ -9,6 +9,7 @@ export function CardsBlock({
   getLocalizedText,
   getSvgHtml,
   renderBlockButtons,
+  stepLabel,
 }: BlockRendererProps) {
   const visibleBlocks = blocks.filter(
     (b) =>
@@ -29,9 +30,11 @@ export function CardsBlock({
           <div
             key={index}
             className={`rounded-2xl border p-4 sm:p-5 ${
-              isLight
-                ? 'border-dark-700/60 bg-white/80 shadow-sm'
-                : 'border-dark-700/50 bg-dark-800/50'
+              stepLabel && index === 0
+                ? 'border-accent-400/40 bg-accent-500/5'
+                : isLight
+                  ? 'border-dark-700/60 bg-white/80 shadow-sm'
+                  : 'border-dark-700/50 bg-dark-800/50'
             }`}
           >
             <div className="flex items-start gap-3 sm:gap-4">
@@ -42,6 +45,11 @@ export function CardsBlock({
                 isMobile={isMobile}
               />
               <div className="min-w-0 flex-1">
+                {stepLabel && (
+                  <p className="mb-0.5 text-xs font-semibold text-accent-400">
+                    {stepLabel(index, visibleBlocks.length)}
+                  </p>
+                )}
                 <h3 className="font-semibold text-dark-100">{getLocalizedText(block.title)}</h3>
                 <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-dark-400">
                   {getLocalizedText(block.description)}
