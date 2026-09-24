@@ -3,8 +3,8 @@
  * Listens to all WebSocket events and shows appropriate toasts or modals.
  */
 
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useCallback, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useWebSocket, type WSMessage } from '../hooks/useWebSocket';
@@ -12,11 +12,16 @@ import { useToast } from './Toast';
 import { useAuthStore } from '../store/auth';
 import { useCurrency } from '../hooks/useCurrency';
 import { useSuccessNotification } from '../store/successNotification';
+import { loadPendingCheckout, shouldSuppressWsModal } from '../utils/checkout';
 
 export default function WebSocketNotifications() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  // Ref, а не зависимость handleMessage: смена экрана не должна переподписывать WS.
+  const location = useLocation();
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
   const { showToast } = useToast();
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const { formatAmount, currencySymbol } = useCurrency();
@@ -25,6 +30,11 @@ export default function WebSocketNotifications() {
   const handleMessage = useCallback(
     (message: WSMessage) => {
       const { type } = message;
+      const suppressModal = shouldSuppressWsModal(
+        type,
+        loadPendingCheckout() !== null,
+        pathnameRef.current,
+      );
 
       // Skip ticket events - they are handled by TicketNotificationBell
       if (type.startsWith('ticket.')) {
@@ -34,11 +44,13 @@ export default function WebSocketNotifications() {
       // Balance events
       if (type === 'balance.topup') {
         // Show prominent success modal for balance top-up
-        showSuccessModal({
-          type: 'balance_topup',
-          amountKopeks: message.amount_kopeks,
-          newBalanceKopeks: message.new_balance_kopeks,
-        });
+        if (!suppressModal) {
+          showSuccessModal({
+            type: 'balance_topup',
+            amountKopeks: message.amount_kopeks,
+            newBalanceKopeks: message.new_balance_kopeks,
+          });
+        }
         // Refresh data
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
@@ -77,11 +89,13 @@ export default function WebSocketNotifications() {
       // Subscription events
       if (type === 'subscription.activated') {
         // Show prominent success modal for subscription activation
-        showSuccessModal({
-          type: 'subscription_activated',
-          expiresAt: message.expires_at,
-          tariffName: message.tariff_name,
-        });
+        if (!suppressModal) {
+          showSuccessModal({
+            type: 'subscription_activated',
+            expiresAt: message.expires_at,
+            tariffName: message.tariff_name,
+          });
+        }
         queryClient.invalidateQueries({
           predicate: (query) =>
             Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
@@ -95,11 +109,13 @@ export default function WebSocketNotifications() {
 
       if (type === 'subscription.renewed') {
         // Show prominent success modal for subscription renewal
-        showSuccessModal({
-          type: 'subscription_renewed',
-          amountKopeks: message.amount_kopeks,
-          expiresAt: message.new_expires_at,
-        });
+        if (!suppressModal) {
+          showSuccessModal({
+            type: 'subscription_renewed',
+            amountKopeks: message.amount_kopeks,
+            expiresAt: message.new_expires_at,
+          });
+        }
         queryClient.invalidateQueries({
           predicate: (query) =>
             Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
