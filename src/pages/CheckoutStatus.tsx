@@ -27,9 +27,14 @@ const QUIET =
   'flex min-h-[44px] w-full items-center justify-center text-[15px] font-medium text-dark-400 hover:text-dark-200';
 
 function paymentPathFor(pending: PendingCheckout): string {
-  return pending.kind === 'renew' && pending.subscriptionId !== null
-    ? `/subscriptions/${pending.subscriptionId}/renew`
-    : '/subscription/purchase';
+  if (pending.subscriptionId !== null) {
+    if (pending.kind === 'renew') return `/subscriptions/${pending.subscriptionId}/renew`;
+    // Докупка живёт на странице подписки.
+    if (pending.kind === 'devices' || pending.kind === 'traffic') {
+      return `/subscriptions/${pending.subscriptionId}`;
+    }
+  }
+  return '/subscription/purchase';
 }
 
 /**
@@ -105,6 +110,16 @@ export default function CheckoutStatus() {
           pending.periodDays,
           pending.subscriptionId ?? undefined,
         );
+      } else if (pending.kind === 'devices') {
+        await subscriptionApi.purchaseDevices(
+          pending.devices ?? 1,
+          pending.subscriptionId ?? undefined,
+        );
+      } else if (pending.kind === 'traffic') {
+        await subscriptionApi.purchaseTraffic(
+          pending.trafficGb ?? 0,
+          pending.subscriptionId ?? undefined,
+        );
       } else if (pending.tariffId !== null) {
         await subscriptionApi.purchaseTariff(
           pending.tariffId,
@@ -125,6 +140,49 @@ export default function CheckoutStatus() {
   });
 
   if (!pending) return <Navigate to="/" replace />;
+
+  if (result?.status === 'done' && result.subscription && pending.kind === 'devices') {
+    const sub = result.subscription;
+    return (
+      <div className="mx-auto flex max-w-md flex-col gap-6 pt-6 text-center">
+        <AnimatedCheckmark className="mx-auto" />
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-dark-50">{t('checkout.addon.devicesDone')}</h1>
+          <p className="text-dark-300">
+            {t('checkout.addon.devicesDoneDesc', { count: sub.device_limit })}
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Link to={`/connection?sub=${sub.id}`} replace className={PRIMARY}>
+            {t('checkout.done.connect')}
+          </Link>
+          <Link to={`/subscriptions/${sub.id}`} replace className={QUIET}>
+            {t('checkout.addon.toSubscription')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (result?.status === 'done' && result.subscription && pending.kind === 'traffic') {
+    const sub = result.subscription;
+    return (
+      <div className="mx-auto flex max-w-md flex-col gap-6 pt-6 text-center">
+        <AnimatedCheckmark className="mx-auto" />
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-dark-50">{t('checkout.addon.trafficDone')}</h1>
+          <p className="text-dark-300">
+            {sub.traffic_limit_gb === 0
+              ? t('checkout.addon.trafficDoneUnlimited')
+              : t('checkout.addon.trafficDoneDesc', { gb: sub.traffic_limit_gb })}
+          </p>
+        </div>
+        <Link to={`/subscriptions/${sub.id}`} replace className={PRIMARY}>
+          {t('checkout.addon.toSubscription')}
+        </Link>
+      </div>
+    );
+  }
 
   if (result?.status === 'done' && result.subscription) {
     const sub = result.subscription;

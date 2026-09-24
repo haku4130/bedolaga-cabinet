@@ -209,12 +209,14 @@ export default function WebSocketNotifications() {
 
       if (type === 'subscription.devices_purchased') {
         // Show prominent success modal for device purchase
-        showSuccessModal({
-          type: 'devices_purchased',
-          amountKopeks: message.amount_kopeks,
-          devicesAdded: message.devices_added,
-          newDeviceLimit: message.new_device_limit,
-        });
+        if (!suppressModal) {
+          showSuccessModal({
+            type: 'devices_purchased',
+            amountKopeks: message.amount_kopeks,
+            devicesAdded: message.devices_added,
+            newDeviceLimit: message.new_device_limit,
+          });
+        }
         queryClient.invalidateQueries({
           predicate: (query) =>
             Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
@@ -229,12 +231,14 @@ export default function WebSocketNotifications() {
 
       if (type === 'subscription.traffic_purchased') {
         // Show prominent success modal for traffic purchase
-        showSuccessModal({
-          type: 'traffic_purchased',
-          amountKopeks: message.amount_kopeks,
-          trafficGbAdded: message.traffic_gb_added,
-          newTrafficLimitGb: message.new_traffic_limit_gb,
-        });
+        if (!suppressModal) {
+          showSuccessModal({
+            type: 'traffic_purchased',
+            amountKopeks: message.amount_kopeks,
+            trafficGbAdded: message.traffic_gb_added,
+            newTrafficLimitGb: message.new_traffic_limit_gb,
+          });
+        }
         queryClient.invalidateQueries({
           predicate: (query) =>
             Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',

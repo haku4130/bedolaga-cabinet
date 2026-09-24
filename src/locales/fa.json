@@ -6384,6 +6384,17 @@
       "desc": "{{label}} for {{price}}. The money is already on your balance.",
       "cta": "Activate subscription",
       "dismiss": "Not now"
+    },
+    "addon": {
+      "devicesLabel": "devices: +{{count}}",
+      "trafficLabel": "traffic: +{{gb}} GB",
+      "trafficUnlimitedLabel": "unlimited traffic",
+      "devicesDone": "Devices added",
+      "devicesDoneDesc": "You can now connect up to {{count}} devices.",
+      "trafficDone": "Traffic added",
+      "trafficDoneDesc": "Traffic limit: {{gb}} GB.",
+      "trafficDoneUnlimited": "Traffic is now unlimited.",
+      "toSubscription": "To subscription"
     }
   },
   "connect": {

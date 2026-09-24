@@ -31,16 +31,29 @@ vi.mock('@/hooks/useCurrency', () => ({
 const api = vi.hoisted(() => ({
   endDate: '2026-09-01T00:00:00Z',
   balance: 0,
+  deviceLimit: 3,
   purchaseTariff: vi.fn(async (..._args: unknown[]) => ({ success: true })),
+  purchaseDevices: vi.fn(async (..._args: unknown[]) => ({ success: true })),
 }));
 
 vi.mock('@/api/subscription', () => ({
   subscriptionApi: {
     getSubscriptions: async () => ({
       multi_tariff_enabled: false,
-      subscriptions: [{ id: 5, tariff_id: 7, status: 'active', end_date: api.endDate }],
+      subscriptions: [
+        {
+          id: 5,
+          tariff_id: 7,
+          status: 'active',
+          end_date: api.endDate,
+          device_limit: api.deviceLimit,
+          traffic_limit_gb: 100,
+        },
+      ],
     }),
     purchaseTariff: api.purchaseTariff,
+    purchaseDevices: api.purchaseDevices,
+    purchaseTraffic: vi.fn(),
     renewSubscription: vi.fn(),
   },
 }));
@@ -82,7 +95,9 @@ const seed = (createdAt = Date.now()) =>
 beforeEach(() => {
   api.endDate = '2026-09-01T00:00:00Z';
   api.balance = 0;
+  api.deviceLimit = 3;
   api.purchaseTariff.mockClear();
+  api.purchaseDevices.mockClear();
 });
 
 afterEach(() => {
@@ -131,5 +146,49 @@ describe('страница статуса оплаты', () => {
     await waitFor(() =>
       expect(api.purchaseTariff).toHaveBeenCalledWith(7, 30, undefined, undefined),
     );
+  });
+
+  it('докупка устройств прошла — «Устройства добавлены» и подключение', async () => {
+    savePendingCheckout({
+      kind: 'devices',
+      tariffId: 7,
+      subscriptionId: 5,
+      periodDays: 0,
+      trafficGb: null,
+      devices: 1,
+      label: 'Стандартный · устройства: +1',
+      priceKopeks: 45300,
+      baselineEndDate: '2026-09-01T00:00:00Z',
+      baselineDeviceLimit: 3,
+      baselineTrafficLimitGb: 100,
+      createdAt: Date.now(),
+    });
+    api.deviceLimit = 4;
+    await renderStatus();
+    await waitFor(() => expect(screen.getByText('checkout.addon.devicesDone')).toBeTruthy());
+    expect(screen.getByText('checkout.done.connect').closest('a')?.getAttribute('href')).toBe(
+      '/connection?sub=5',
+    );
+  });
+
+  it('деньги на докупку пришли, автопокупки не было — «Оформить» докупает устройства', async () => {
+    savePendingCheckout({
+      kind: 'devices',
+      tariffId: 7,
+      subscriptionId: 5,
+      periodDays: 0,
+      trafficGb: null,
+      devices: 1,
+      label: 'Стандартный · устройства: +1',
+      priceKopeks: 45300,
+      baselineEndDate: '2026-09-01T00:00:00Z',
+      baselineDeviceLimit: 3,
+      baselineTrafficLimitGb: 100,
+      createdAt: Date.now() - CONFIRM_AFTER_CREATED_MS,
+    });
+    api.balance = 45300;
+    await renderStatus();
+    fireEvent.click(await screen.findByText('checkout.confirm.cta'));
+    await waitFor(() => expect(api.purchaseDevices).toHaveBeenCalledWith(1, 5));
   });
 });

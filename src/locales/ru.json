@@ -7477,6 +7477,17 @@
       "desc": "{{label}} за {{price}}. Оплата уже на вашем балансе.",
       "cta": "Оформить подписку",
       "dismiss": "Не сейчас"
+    },
+    "addon": {
+      "devicesLabel": "устройства: +{{count}}",
+      "trafficLabel": "трафик: +{{gb}} ГБ",
+      "trafficUnlimitedLabel": "безлимитный трафик",
+      "devicesDone": "Устройства добавлены",
+      "devicesDoneDesc": "Теперь можно подключить до {{count}} устройств.",
+      "trafficDone": "Трафик добавлен",
+      "trafficDoneDesc": "Лимит трафика: {{gb}} ГБ.",
+      "trafficDoneUnlimited": "Трафик теперь без ограничений.",
+      "toSubscription": "К подписке"
     }
   },
   "connect": {
