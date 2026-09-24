@@ -6350,5 +6350,40 @@
     },
     "start": "Get started",
     "skip": "I'll figure it out"
+  },
+  "checkout": {
+    "pay": "Pay {{amount}}",
+    "payFromBalance": "Pay {{amount}} from balance",
+    "fromBalance": "From balance",
+    "toPay": "To pay",
+    "autoActivateHint": "Your subscription starts right after payment. No need to top up your balance separately.",
+    "paymentTitle": "Subscription payment",
+    "chooseMethod": "How to pay",
+    "raisedToMin": "Minimum payment is {{min}}. The remaining {{rest}} stays on your balance.",
+    "toHome": "Go home",
+    "waiting": {
+      "title": "Waiting for payment confirmation",
+      "desc": "As soon as the payment goes through, your subscription starts automatically. Usually it takes less than a minute.",
+      "backToPayment": "Back to payment"
+    },
+    "confirm": {
+      "title": "Money received",
+      "desc": "One step left: activate \"{{label}}\" — we'll charge {{price}} from your balance.",
+      "cta": "Activate for {{price}}"
+    },
+    "done": {
+      "title": "Payment successful",
+      "until": "Subscription active until {{date}}",
+      "lastStepTitle": "One step left",
+      "lastStepDesc": "Connect a device — it takes about a minute. The VPN won't work without it.",
+      "connect": "Connect a device",
+      "later": "Later"
+    },
+    "ready": {
+      "title": "Money received — activate your subscription",
+      "desc": "{{label}} for {{price}}. The money is already on your balance.",
+      "cta": "Activate subscription",
+      "dismiss": "Not now"
+    }
   }
 }
