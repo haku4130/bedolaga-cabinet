@@ -6416,5 +6416,24 @@
   "login": {
     "autoCreate": "No account yet? It will be created automatically.",
     "botFallback": "Not working? Sign in via the bot"
+  },
+  "manage": {
+    "title": "Manage subscription",
+    "devices": "Devices",
+    "sections": {
+      "autopay": "Auto-renewal",
+      "details": "Details"
+    },
+    "manualSetup": "Manual setup",
+    "manualSetupHint": "Subscription link for setting up an app manually. Don't share it.",
+    "autopay": {
+      "offHint_one": "Renew automatically from balance {{count}} day before expiry.",
+      "offHint_other": "Renew automatically from balance {{count}} days before expiry.",
+      "onHint_one": "We'll charge your balance {{count}} day before expiry.",
+      "onHint_other": "We'll charge your balance {{count}} days before expiry.",
+      "balance": "Balance: {{amount}}.",
+      "short": "Your balance is {{amount}} — the renewal won't go through. Top up in advance.",
+      "topUp": "Top up balance"
+    }
   }
 }
