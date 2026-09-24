@@ -35,6 +35,9 @@ const pending = (overrides: Partial<PendingCheckout> = {}): PendingCheckout => (
   label: 'Стандартный · 1 месяц',
   priceKopeks: 19900,
   baselineEndDate: '2026-09-01T00:00:00Z',
+  devices: null,
+  baselineDeviceLimit: null,
+  baselineTrafficLimitGb: null,
   createdAt: NOW,
   ...overrides,
 });
@@ -176,6 +179,40 @@ describe('resolveCheckoutStatus', () => {
   });
 });
 
+describe('resolveCheckoutStatus — докупка', () => {
+  const base = { now: NOW, openedAt: NOW, balanceKopeks: 0 };
+
+  it('устройства: лимит вырос — готово', () => {
+    const p = pending({ kind: 'devices', subscriptionId: 5, devices: 1, baselineDeviceLimit: 3 });
+    expect(
+      resolveCheckoutStatus({ ...base, pending: p, subscriptions: [sub({ device_limit: 4 })] })
+        .status,
+    ).toBe('done');
+    expect(
+      resolveCheckoutStatus({ ...base, pending: p, subscriptions: [sub({ device_limit: 3 })] })
+        .status,
+    ).toBe('waiting');
+  });
+
+  it('трафик: лимит вырос или стал безлимитным — готово', () => {
+    const p = pending({
+      kind: 'traffic',
+      subscriptionId: 5,
+      trafficGb: 50,
+      baselineTrafficLimitGb: 100,
+    });
+    const status = (limit: number) =>
+      resolveCheckoutStatus({
+        ...base,
+        pending: p,
+        subscriptions: [sub({ traffic_limit_gb: limit })],
+      }).status;
+    expect(status(150)).toBe('done');
+    expect(status(0)).toBe('done');
+    expect(status(100)).toBe('waiting');
+  });
+});
+
 describe('getCheckoutShortfall', () => {
   const error402 = (detail: unknown) => {
     const headers = new AxiosHeaders();
@@ -206,6 +243,14 @@ describe('getCheckoutShortfall', () => {
     expect(
       getCheckoutShortfall(error402({ code: 'insufficient_funds', missing_amount: 4900 })),
     ).toBeNull();
+  });
+
+  it('докупка устройств отдаёт недостающее в missing_kopeks', () => {
+    expect(
+      getCheckoutShortfall(
+        error402({ code: 'insufficient_funds', missing_kopeks: 45300, cart_saved: true }),
+      ),
+    ).toBe(45300);
   });
 
   it('другая ошибка — null', () => {
@@ -242,5 +287,12 @@ describe('shouldSuppressWsModal', () => {
     );
     expect(shouldSuppressWsModal('subscription.renewed', true, '/subscription/status')).toBe(true);
     expect(shouldSuppressWsModal('subscription.activated', true, '/')).toBe(false);
+  });
+
+  it('модалки докупки тоже не показываем поверх страницы статуса', () => {
+    for (const type of ['subscription.devices_purchased', 'subscription.traffic_purchased']) {
+      expect(shouldSuppressWsModal(type, true, '/subscription/status'), type).toBe(true);
+      expect(shouldSuppressWsModal(type, true, '/'), type).toBe(false);
+    }
   });
 });

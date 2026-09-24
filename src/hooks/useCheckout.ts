@@ -17,9 +17,11 @@ export interface CheckoutRequest {
   subscriptionId: number | null;
   periodDays: number;
   trafficGb: number | null;
+  /** Докупка устройств: сколько добавить. */
+  devices?: number | null;
   label: string;
   priceKopeks: number;
-  /** Списание с баланса: purchaseTariff или renewSubscription. */
+  /** Списание с баланса: purchaseTariff, renewSubscription, purchaseDevices или purchaseTraffic. */
   pay: () => Promise<unknown>;
 }
 
@@ -47,9 +49,12 @@ export function useCheckout() {
         subscriptionId: request.subscriptionId,
         periodDays: request.periodDays,
         trafficGb: request.trafficGb,
+        devices: request.devices ?? null,
         label: request.label,
         priceKopeks: request.priceKopeks,
         baselineEndDate: target?.end_date ?? null,
+        baselineDeviceLimit: target?.device_limit ?? null,
+        baselineTrafficLimitGb: target?.traffic_limit_gb ?? null,
         createdAt: Date.now(),
       });
 

@@ -73,6 +73,9 @@ const seed = (createdAt = Date.now()) =>
     label: 'Стандартный · 1 месяц',
     priceKopeks: 19900,
     baselineEndDate: '2026-09-01T00:00:00Z',
+    devices: null,
+    baselineDeviceLimit: null,
+    baselineTrafficLimitGb: null,
     createdAt,
   });
 

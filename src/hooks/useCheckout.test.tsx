@@ -15,7 +15,16 @@ vi.mock('@/api/subscription', () => ({
   subscriptionApi: {
     getSubscriptions: async () => ({
       multi_tariff_enabled: false,
-      subscriptions: [{ id: 5, tariff_id: 7, status: 'active', end_date: '2026-09-01T00:00:00Z' }],
+      subscriptions: [
+        {
+          id: 5,
+          tariff_id: 7,
+          status: 'active',
+          end_date: '2026-09-01T00:00:00Z',
+          device_limit: 3,
+          traffic_limit_gb: 100,
+        },
+      ],
     }),
   },
 }));
@@ -106,6 +115,25 @@ describe('useCheckout', () => {
       ),
     );
     expect(loadPendingCheckout()).not.toBeNull();
+  });
+
+  it('докупка устройств запоминает лимиты до оплаты', async () => {
+    await mount();
+    act(() =>
+      started?.start({
+        ...request(async () => ({ success: true })),
+        kind: 'devices',
+        subscriptionId: 5,
+        devices: 1,
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId('location').textContent).toBe('/subscription/status'),
+    );
+    const saved = loadPendingCheckout();
+    expect(saved?.devices).toBe(1);
+    expect(saved?.baselineDeviceLimit).toBe(3);
+    expect(saved?.baselineTrafficLimitGb).toBe(100);
   });
 
   it('корзина не сохранена — ошибка на месте, покупка забыта', async () => {
