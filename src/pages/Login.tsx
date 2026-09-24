@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { isTelegramLoginConfigured } from '../utils/telegramLogin';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../store/auth';
 import { useShallow } from 'zustand/shallow';
@@ -74,7 +75,7 @@ export default function Login() {
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [forgotPasswordError, setForgotPasswordError] = useState('');
-  const [showEmailForm, setShowEmailForm] = useState(true);
+  const [showEmailForm, setShowEmailForm] = useState(false);
 
   // Гейт согласия с офертой/политикой для НОВОГО пользователя. Конфиг публичный:
   // нужен до авторизации, чтобы нарисовать чекбоксы ещё на экране входа.
@@ -133,6 +134,20 @@ export default function Login() {
     staleTime: 60000,
   });
   const isEmailAuthEnabled = emailAuthConfig?.enabled ?? true;
+
+  // Форма email свёрнута: главный путь — Telegram. Но если Telegram-вход на
+  // инстансе не настроен, email — единственный путь, и форма открыта сразу.
+  const { data: telegramWidgetConfig } = useQuery({
+    queryKey: ['telegram-widget-config'],
+    queryFn: brandingApi.getTelegramWidgetConfig,
+    staleTime: 60000,
+  });
+  useEffect(() => {
+    if (!telegramWidgetConfig) return;
+    const botUsername =
+      telegramWidgetConfig.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
+    if (!isTelegramLoginConfigured(botUsername)) setShowEmailForm(true);
+  }, [telegramWidgetConfig]);
 
   const { data: footerEnabled } = useQuery({
     queryKey: ['footer-enabled'],
@@ -482,56 +497,57 @@ export default function Login() {
               )}
             </div>
 
+            {/* Один «или» перед второстепенными способами входа */}
+            {(oauthProviders.length > 0 || isEmailAuthEnabled) && (
+              <div className="my-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-dark-700" />
+                <span className="text-xs text-dark-500">{t('auth.or', 'or')}</span>
+                <div className="h-px flex-1 bg-dark-700" />
+              </div>
+            )}
+
             {/* OAuth providers - compact icon row */}
             {oauthProviders.length > 0 && (
-              <>
-                <div className="my-4 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-dark-700" />
-                  <span className="text-xs text-dark-500">{t('auth.or', 'or')}</span>
-                  <div className="h-px flex-1 bg-dark-700" />
-                </div>
-                <div className="flex items-stretch gap-2">
-                  {oauthProviders.map((provider) => (
-                    <button
-                      key={provider.name}
-                      type="button"
-                      onClick={() => handleOAuthLogin(provider.name)}
-                      disabled={oauthLoading !== null}
-                      className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border border-dark-700 bg-dark-800/80 py-2.5 transition-all hover:border-dark-600 hover:bg-dark-700 disabled:opacity-50"
-                      title={provider.display_name}
-                    >
-                      {oauthLoading === provider.name ? (
-                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-dark-400 border-t-white" />
-                      ) : (
-                        <OAuthProviderIcon provider={provider.name} className="h-5 w-5" />
-                      )}
-                      <span className="text-[10px] leading-none text-dark-500">
-                        {provider.display_name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </>
+              <div className="flex items-stretch gap-2">
+                {oauthProviders.map((provider) => (
+                  <button
+                    key={provider.name}
+                    type="button"
+                    onClick={() => handleOAuthLogin(provider.name)}
+                    disabled={oauthLoading !== null}
+                    className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border border-dark-700 bg-dark-800/80 py-2.5 transition-all hover:border-dark-600 hover:bg-dark-700 disabled:opacity-50"
+                    title={provider.display_name}
+                  >
+                    {oauthLoading === provider.name ? (
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-dark-400 border-t-white" />
+                    ) : (
+                      <OAuthProviderIcon provider={provider.name} className="h-5 w-5" />
+                    )}
+                    <span className="text-[10px] leading-none text-dark-500">
+                      {provider.display_name}
+                    </span>
+                  </button>
+                ))}
+              </div>
             )}
 
             {/* Email auth section - collapsible */}
             {isEmailAuthEnabled && (
               <>
-                <div className="my-4 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-dark-700" />
-                  <button
-                    type="button"
-                    onClick={() => setShowEmailForm(!showEmailForm)}
-                    className="flex items-center gap-1.5 rounded-full border border-dark-700 bg-dark-800/60 px-3.5 py-1.5 text-xs font-medium text-dark-300 transition-all hover:border-dark-600 hover:bg-dark-700 hover:text-dark-200"
-                  >
-                    <EmailIcon className="h-3.5 w-3.5 text-dark-400" />
-                    <span>{t('auth.loginWithEmail')}</span>
-                    <ChevronDownIcon
-                      className={`h-3 w-3 text-dark-400 transition-transform duration-300 ${showEmailForm ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                  <div className="h-px flex-1 bg-dark-700" />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowEmailForm(!showEmailForm)}
+                  aria-expanded={showEmailForm}
+                  className={`flex w-full items-center justify-center gap-2 rounded-xl border border-dark-700 bg-dark-800/60 py-3 text-sm font-medium text-dark-200 transition-colors hover:border-dark-600 hover:bg-dark-700 ${
+                    oauthProviders.length > 0 ? 'mt-3' : ''
+                  }`}
+                >
+                  <EmailIcon className="h-4 w-4 text-dark-400" />
+                  <span>{t('auth.loginWithEmail')}</span>
+                  <ChevronDownIcon
+                    className={`h-4 w-4 text-dark-400 transition-transform duration-300 ${showEmailForm ? 'rotate-180' : ''}`}
+                  />
+                </button>
 
                 {/* Collapsible email form */}
                 <div
@@ -541,7 +557,7 @@ export default function Login() {
                   style={{ transform: 'translateZ(0)' }}
                 >
                   <div className="overflow-hidden">
-                    <div className="space-y-4 pb-1 pt-1">
+                    <div className="space-y-4 pb-1 pt-4">
                       {showForgotPassword ? (
                         /* Forgot password screen - replaces login/register */
                         forgotPasswordSent ? (
