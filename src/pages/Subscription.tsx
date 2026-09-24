@@ -1,5 +1,5 @@
 import { uiLocale } from '@/utils/uiLocale';
-import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
@@ -7,7 +7,6 @@ import { subscriptionApi } from '../api/subscription';
 import { WebBackButton } from '../components/WebBackButton';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
-import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useTrafficZone } from '../hooks/useTrafficZone';
 import { formatTraffic } from '../utils/formatTraffic';
 import { getGlassColors } from '../utils/glassTheme';
@@ -17,14 +16,16 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
-import { DevicesPanel } from '../components/subscription/DevicesPanel';
+import { StatusFacts } from '../components/subscription/manage/StatusFacts';
+import { BalanceAutopayHint } from '../components/subscription/manage/BalanceAutopayHint';
+import { CollapsibleSection } from '../components/subscription/manage/CollapsibleSection';
+import { SectionTitle } from '../components/subscription/manage/SectionTitle';
+import { minRenewalPriceKopeks } from '../utils/autopayFunding';
 import {
   CopyIcon,
   CheckIcon,
   PauseIcon,
-  CalendarIcon,
   RefreshIcon,
-  DevicesIcon,
   DownloadIcon,
   TrashIcon,
 } from '../components/icons';
@@ -58,149 +59,6 @@ import { ServerManagementSheet } from '../components/subscription/sheets/ServerM
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { safeLocal } from '../utils/safeStorage';
-
-/** Isolated countdown so 1s interval doesn't re-render the whole page */
-const CountdownTimer = memo(function CountdownTimer({
-  endDate,
-  isActive,
-  glassColors: g,
-}: {
-  endDate: string;
-  isActive: boolean;
-  glassColors: ReturnType<typeof getGlassColors>;
-}) {
-  const { t } = useTranslation();
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  useEffect(() => {
-    const endTime = new Date(endDate).getTime();
-    const tick = () => {
-      const diff = Math.max(0, endTime - Date.now());
-      setCountdown({
-        days: Math.floor(diff / 86_400_000),
-        hours: Math.floor((diff % 86_400_000) / 3_600_000),
-        minutes: Math.floor((diff % 3_600_000) / 60_000),
-        seconds: Math.floor((diff % 60_000) / 1_000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [endDate]);
-
-  const isExpired = !isActive;
-  const isUrgent = countdown.days <= 3;
-
-  const formattedDate = new Date(endDate).toLocaleDateString(uiLocale(), {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-
-  return (
-    <div
-      className="min-w-0 overflow-hidden rounded-[14px] p-3.5"
-      style={{
-        background: isExpired
-          ? 'rgba(255,59,92,0.06)'
-          : isUrgent
-            ? 'rgba(255,184,0,0.06)'
-            : g.innerBg,
-        border: isExpired
-          ? '1px solid rgba(255,59,92,0.15)'
-          : isUrgent
-            ? '1px solid rgba(255,184,0,0.15)'
-            : `1px solid ${g.innerBorder}`,
-      }}
-    >
-      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-400">
-        <div
-          className="flex h-6 w-6 items-center justify-center rounded-[7px]"
-          style={{
-            background: isExpired
-              ? 'rgba(255,59,92,0.1)'
-              : isUrgent
-                ? 'rgba(255,184,0,0.1)'
-                : g.hoverBg,
-          }}
-        >
-          <span
-            style={{
-              color: isExpired
-                ? 'rgb(var(--color-critical-500))'
-                : isUrgent
-                  ? 'rgb(var(--color-urgent-400))'
-                  : g.textSecondary,
-            }}
-          >
-            <CalendarIcon className="h-[13px] w-[13px]" />
-          </span>
-        </div>
-        {t('dashboard.remaining')}
-      </div>
-      {isExpired ? (
-        <div
-          className="text-[18px] font-bold tracking-tight"
-          style={{ color: 'rgb(var(--color-critical-500))' }}
-        >
-          {t('subscription.expired')}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-          {/* На телефоне дата уходит на свою строку: рядом с таймером ей не хватало места, и она ломалась посреди «23 сент. / 2026 г.» */}
-          <div className="flex items-baseline gap-1 font-mono tabular-nums">
-            {countdown.days > 0 && (
-              <>
-                <span
-                  className="text-[20px] font-bold tracking-tight"
-                  style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-                >
-                  {countdown.days}
-                </span>
-                <span className="mr-1 text-[10px] font-medium text-dark-400">
-                  {t('subscription.daysShort')}
-                </span>
-              </>
-            )}
-            <span
-              className="text-[20px] font-bold tracking-tight"
-              style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-            >
-              {String(countdown.hours).padStart(2, '0')}
-            </span>
-            <span
-              className="mx-[-1px] text-[16px] font-bold opacity-30"
-              style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-            >
-              :
-            </span>
-            <span
-              className="text-[20px] font-bold tracking-tight"
-              style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-            >
-              {String(countdown.minutes).padStart(2, '0')}
-            </span>
-            <span
-              className="mx-[-1px] text-[16px] font-bold opacity-30"
-              style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-            >
-              :
-            </span>
-            <span
-              className="text-[20px] font-bold tracking-tight"
-              style={{ color: isUrgent ? 'rgb(var(--color-urgent-400))' : g.text }}
-            >
-              {String(countdown.seconds).padStart(2, '0')}
-            </span>
-          </div>
-          <div className="text-[10px] font-medium text-dark-400">
-            {t('subscription.expiresAt')}: {formattedDate}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
 
 export default function Subscription() {
   const { t } = useTranslation();
@@ -308,6 +166,16 @@ export default function Subscription() {
     refetchOnMount: 'always',
   });
   const purchaseOptions = purchaseOptionsQuery.data;
+
+  // Самая дешёвая цена продления — чтобы честно сказать, хватит ли баланса на
+  // автопродление (точную цену автоплатежа бот выбирает сам).
+  const { data: renewalOptions } = useQuery({
+    queryKey: ['renewal-options', subscriptionId],
+    queryFn: () => subscriptionApi.getRenewalOptions(subscriptionId),
+    enabled: !!subscription && !subscription.is_trial && !subscription.is_daily,
+    staleTime: 60_000,
+  });
+  const minRenewalKopeks = minRenewalPriceKopeks(renewalOptions);
 
   // Состояние автооплаты спрашиваем, только когда она включена: иначе бэкенд
   // отвечает 403, и браузер печатает красную строку с полным стеком на каждый
@@ -665,11 +533,12 @@ export default function Subscription() {
       {/* Page title */}
       <div className="flex items-center gap-3">
         <WebBackButton to={isMultiTariff ? '/subscriptions' : '/'} />
-        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {isMultiTariff && subscription?.tariff_name
-            ? subscription.tariff_name
-            : t('subscription.title')}
-        </h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('manage.title')}</h1>
+          {subscription?.tariff_name && (
+            <p className="mt-0.5 truncate text-sm text-dark-400">{subscription.tariff_name}</p>
+          )}
+        </div>
       </div>
 
       {/* Current Subscription */}
@@ -679,8 +548,6 @@ export default function Subscription() {
           const isUnlimited =
             (trafficData?.is_unlimited ?? false) || subscription.traffic_limit_gb === 0;
           const connectedDevices = devicesData?.total ?? 0;
-          const isAtDeviceLimit =
-            subscription.device_limit > 0 && connectedDevices >= subscription.device_limit;
 
           return (
             <div
@@ -894,279 +761,85 @@ export default function Subscription() {
                 </div>
               )}
 
-              {/* ─── Traffic Progress ─── */}
-              <div className="mb-6">
-                <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
-                    {t('subscription.traffic')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] text-dark-400">
-                      {isUnlimited
-                        ? formatTraffic(usedGb)
-                        : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
-                    </span>
-                    <button
-                      onClick={() => refreshTrafficMutation.mutate()}
-                      disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
-                      className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <RefreshIcon
-                        className="h-3 w-3"
-                        spinning={refreshTrafficMutation.isPending}
-                      />
-                      {trafficRefreshCooldown > 0
-                        ? `${trafficRefreshCooldown}s`
-                        : t('common.refresh')}
-                    </button>
-                  </div>
-                </div>
-                {subscription.traffic_reset_mode &&
-                  subscription.traffic_reset_mode !== 'NO_RESET' && (
-                    <div className="mb-2 text-[10px] text-dark-400">
-                      {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
-                    </div>
-                  )}
-                <TrafficProgressBar
-                  usedGb={usedGb}
-                  limitGb={subscription.traffic_limit_gb}
-                  percent={usedPercent}
-                  isUnlimited={isUnlimited}
-                  compact
-                />
-              </div>
+              <StatusFacts subscription={subscription} connectedDevices={connectedDevices} />
 
-              {/* ─── Connect Device Button ─── */}
-              {subscription.subscription_url && (
-                <HoverBorderGradient
-                  as="button"
-                  accentColor={zone.mainHex}
-                  disabled={isAtDeviceLimit}
-                  onClick={() => {
-                    if (isAtDeviceLimit) {
-                      haptic.notification('error');
-                      return;
-                    }
-                    navigate(subscriptionId ? `/connection?sub=${subscriptionId}` : '/connection');
-                  }}
-                  className={`mb-5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300${isAtDeviceLimit ? 'cursor-not-allowed opacity-50' : ''}`}
-                  style={{ fontFamily: 'inherit' }}
-                >
-                  <div
-                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] transition-colors duration-500"
-                    style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
-                  >
-                    <DevicesIcon className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold tracking-tight text-dark-50">
-                      {t('dashboard.connectDevice')}
-                    </div>
-                    <div className="mt-0.5 text-[11px] text-dark-400">
-                      {subscription.device_limit === 0
-                        ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
-                        : t('dashboard.devicesOfMax', {
-                            used: connectedDevices,
-                            max: subscription.device_limit,
-                          })}
-                    </div>
-                    {isAtDeviceLimit && (
-                      <div
-                        className="mt-1 text-[10px] font-medium"
-                        style={{ color: 'rgb(var(--color-warning-400))' }}
+              {/* ─── Traffic Progress ─── */}
+              {!isUnlimited && (
+                <div className="mb-6">
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
+                      {t('subscription.traffic')}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[11px] text-dark-400">
+                        {isUnlimited
+                          ? formatTraffic(usedGb)
+                          : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
+                      </span>
+                      <button
+                        onClick={() => refreshTrafficMutation.mutate()}
+                        disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
+                        className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {t('dashboard.deviceLimitReached')}
+                        <RefreshIcon
+                          className="h-3 w-3"
+                          spinning={refreshTrafficMutation.isPending}
+                        />
+                        {trafficRefreshCooldown > 0
+                          ? `${trafficRefreshCooldown}s`
+                          : t('common.refresh')}
+                      </button>
+                    </div>
+                  </div>
+                  {subscription.traffic_reset_mode &&
+                    subscription.traffic_reset_mode !== 'NO_RESET' && (
+                      <div className="mb-2 text-[10px] text-dark-400">
+                        {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
                       </div>
                     )}
-                  </div>
-                  {subscription.device_limit === 0 ? (
-                    <div
-                      className="flex flex-shrink-0 items-center text-lg text-dark-400"
-                      aria-hidden="true"
-                    >
-                      ∞
-                    </div>
-                  ) : subscription.device_limit <= 10 ? (
-                    <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
-                      {Array.from({ length: subscription.device_limit }, (_, i) => (
-                        <div
-                          key={i}
-                          className="h-[7px] w-[7px] rounded-full transition-[background-color,box-shadow] duration-300"
-                          style={{
-                            background: i < connectedDevices ? zone.mainHex : g.textGhost,
-                            boxShadow: i < connectedDevices ? `0 0 6px ${zone.mainHex}50` : 'none',
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex w-16 flex-shrink-0 items-center" aria-hidden="true">
-                      <div
-                        className="h-[6px] w-full overflow-hidden rounded-full"
-                        style={{ background: g.textGhost }}
-                      >
-                        {/* scaleX (compositor) instead of width (layout-thrash).
-                            Track is 64px (w-16), so 0.0625 floor = 4px minimum,
-                            preserving the prior minWidth behaviour. */}
-                        <div
-                          className="h-full w-full origin-left rounded-full transition-transform duration-500"
-                          style={{
-                            transform: `scaleX(${(() => {
-                              const pct = connectedDevices / subscription.device_limit;
-                              return connectedDevices > 0 ? Math.max(pct, 0.0625) : 0;
-                            })()})`,
-                            background: zone.mainHex,
-                            boxShadow: `0 0 8px ${zone.mainHex}40`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </HoverBorderGradient>
-              )}
-
-              {/* ─── Subscription URL ─── */}
-              {displayedConnectionUrl && !shouldHideConnectionLink && (
-                <div className="mb-5 flex gap-2">
-                  <code
-                    className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-400"
-                    style={{
-                      background: g.codeBg,
-                      border: `1px solid ${g.codeBorder}`,
-                    }}
-                    title={displayedConnectionUrl}
-                  >
-                    {displayedConnectionUrl}
-                  </code>
-                  <button
-                    onClick={copyUrl}
-                    className="flex h-auto items-center rounded-[10px] px-3 transition-colors duration-300"
-                    style={{
-                      background: copied ? 'rgba(var(--color-accent-400), 0.12)' : g.innerBorder,
-                      border: copied
-                        ? '1px solid rgba(var(--color-accent-400), 0.2)'
-                        : `1px solid ${g.trackBg}`,
-                      color: copied ? 'rgb(var(--color-accent-400))' : g.textMuted,
-                    }}
-                    aria-label={t('subscription.copyLink')}
-                    title={t('subscription.copyLink')}
-                  >
-                    {copied ? <CheckIcon /> : <CopyIcon />}
-                  </button>
+                  <TrafficProgressBar
+                    usedGb={usedGb}
+                    limitGb={subscription.traffic_limit_gb}
+                    percent={usedPercent}
+                    isUnlimited={isUnlimited}
+                    compact
+                  />
                 </div>
               )}
+            </div>
+          );
+        })()
+      ) : (
+        <div
+          className="relative overflow-hidden rounded-3xl py-12 text-center"
+          style={{
+            background: g.cardBg,
+            border: `1px solid ${g.cardBorder}`,
+            boxShadow: g.shadow,
+          }}
+        >
+          <div
+            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+            style={{ background: g.hoverBg, color: g.textFaint }}
+          >
+            <TrashIcon className="h-8 w-8" />
+          </div>
+          <div className="text-sm text-dark-400">{t('subscription.noSubscription')}</div>
+        </div>
+      )}
 
-              {/* ─── Countdown ─── */}
-              <div className="mb-5">
-                <CountdownTimer
-                  endDate={subscription.end_date}
-                  isActive={subscription.is_active || subscription.is_limited}
-                  glassColors={g}
-                />
-              </div>
+      {/* Purchase / Renewal CTA */}
+      <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
 
-              {/* ─── Locations ─── */}
-              {subscription.servers && subscription.servers.length > 0 && (
-                <div className="mb-5">
-                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
-                    {t('subscription.locationsLabel')}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {subscription.servers.map((server) => (
-                      <span
-                        key={server.uuid}
-                        className="inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1 text-[11px] font-medium text-dark-50/50"
-                        style={{
-                          background: g.innerBorder,
-                          border: `1px solid ${g.trackBg}`,
-                        }}
-                      >
-                        {server.country_code && (
-                          <span className="text-xs">{getFlagEmoji(server.country_code)}</span>
-                        )}
-                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
-                          {server.name}
-                        </Twemoji>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ─── Purchased Traffic Packages ─── */}
-              {subscription.traffic_purchases && subscription.traffic_purchases.length > 0 && (
-                <div className="mb-5">
-                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
-                    {t('subscription.purchasedTraffic')}
-                  </div>
-                  <div className="space-y-2">
-                    {subscription.traffic_purchases.map((purchase) => (
-                      <div
-                        key={purchase.id}
-                        className="rounded-[12px] p-3"
-                        style={{
-                          background: g.innerBg,
-                          border: `1px solid ${g.innerBorder}`,
-                        }}
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="flex h-7 w-7 items-center justify-center rounded-[8px]"
-                              style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
-                            >
-                              <DownloadIcon className="h-3.5 w-3.5" />
-                            </div>
-                            <span className="text-sm font-semibold text-dark-50">
-                              {purchase.traffic_gb} {t('common.units.gb')}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <div
-                              className="text-[11px] font-medium"
-                              style={{
-                                color: purchase.days_remaining === 0 ? '#FF6B35' : g.textSecondary,
-                              }}
-                            >
-                              {purchase.days_remaining === 0
-                                ? t('subscription.expired')
-                                : t('subscription.days', { count: purchase.days_remaining })}
-                            </div>
-                            <div className="mt-0.5 font-mono text-[9px] text-dark-400">
-                              {t('subscription.trafficResetAt')}:{' '}
-                              {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="relative h-1.5 overflow-hidden rounded-full"
-                          style={{ background: g.trackBg }}
-                        >
-                          <div
-                            className="absolute inset-0 origin-left rounded-full bg-accent-500 transition-transform duration-500"
-                            style={{
-                              transform: `scaleX(${purchase.progress_percent / 100})`,
-                            }}
-                          />
-                        </div>
-                        <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-400">
-                          <span>
-                            {new Date(purchase.created_at).toLocaleDateString(uiLocale())}
-                          </span>
-                          <span>
-                            {new Date(purchase.expires_at).toLocaleDateString(uiLocale())}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+      {/* Автопродление: с баланса (честно про деньги), SBP, Lava */}
+      {subscription &&
+        !subscription.is_trial &&
+        (!subscription.is_daily ||
+          sbpUiStateValue !== 'hidden' ||
+          lavaUiStateValue !== 'hidden') && (
+          <section className="space-y-2">
+            <SectionTitle>{t('manage.sections.autopay')}</SectionTitle>
+            <div className="space-y-3">
               {/* ─── Autopay Toggle ─── */}
               {!subscription.is_trial && !subscription.is_daily && (
                 <div
@@ -1212,7 +885,15 @@ export default function Subscription() {
                   </button>
                 </div>
               )}
-
+              {!subscription.is_daily && (
+                <BalanceAutopayHint
+                  enabled={subscription.autopay_enabled}
+                  daysBefore={subscription.autopay_days_before}
+                  balanceKopeks={purchaseOptions?.balance_kopeks}
+                  minRenewalKopeks={minRenewalKopeks}
+                  subscriptionId={subscription.id}
+                />
+              )}
               {/* ─── SBP Recurring Auto-payment ───
                    Sibling of the autopay toggle above, guarded ONLY by
                    is_trial + uiState — daily-tariff subscriptions must see
@@ -1328,7 +1009,6 @@ export default function Subscription() {
                   </div>
                 </div>
               )}
-
               {/* ─── Автопродление Lava ───
                    Независимый от Platega движок: сиблинг того же тоггла, те же
                    состояния. Период задан продуктом в кабинете Lava и приезжает
@@ -1451,26 +1131,8 @@ export default function Subscription() {
                 </div>
               )}
             </div>
-          );
-        })()
-      ) : (
-        <div
-          className="relative overflow-hidden rounded-3xl py-12 text-center"
-          style={{
-            background: g.cardBg,
-            border: `1px solid ${g.cardBorder}`,
-            boxShadow: g.shadow,
-          }}
-        >
-          <div
-            className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: g.hoverBg, color: g.textFaint }}
-          >
-            <TrashIcon className="h-8 w-8" />
-          </div>
-          <div className="text-sm text-dark-400">{t('subscription.noSubscription')}</div>
-        </div>
-      )}
+          </section>
+        )}
 
       {/* Daily Subscription Pause */}
       {subscription && subscription.is_daily && !subscription.is_trial && (
@@ -1642,30 +1304,6 @@ export default function Subscription() {
         </div>
       )}
 
-      {/* Purchase / Renewal CTA */}
-      <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
-
-      {/* Delete expired subscription */}
-      {isMultiTariff &&
-        subscription &&
-        !subscription.is_active &&
-        !subscription.is_trial &&
-        !subscription.is_limited && (
-          <div className="space-y-3">
-            <DeleteSubscriptionSheet
-              subscriptionId={subscription.id}
-              open={showDeleteSheet}
-              onOpen={() => setShowDeleteSheet(true)}
-              onClose={() => setShowDeleteSheet(false)}
-              textSecondary={g.textSecondary}
-              onDeleted={() => {
-                queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-                navigate('/subscriptions', { replace: true });
-              }}
-            />
-          </div>
-        )}
-
       {/* Additional Options (Buy Devices) */}
       {subscription &&
         (subscription.is_active || subscription.is_limited) &&
@@ -1747,6 +1385,144 @@ export default function Subscription() {
           </div>
         )}
 
+      {/* Подробности: ручная настройка, локации, докупленный трафик */}
+      {subscription && (
+        <CollapsibleSection title={t('manage.sections.details')}>
+          {displayedConnectionUrl && !shouldHideConnectionLink && (
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-dark-100">{t('manage.manualSetup')}</p>
+              <p className="text-xs text-dark-400">{t('manage.manualSetupHint')}</p>
+            </div>
+          )}
+          {/* ─── Subscription URL ─── */}
+          {displayedConnectionUrl && !shouldHideConnectionLink && (
+            <div className="mb-5 flex gap-2">
+              <code
+                className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-400"
+                style={{
+                  background: g.codeBg,
+                  border: `1px solid ${g.codeBorder}`,
+                }}
+                title={displayedConnectionUrl}
+              >
+                {displayedConnectionUrl}
+              </code>
+              <button
+                onClick={copyUrl}
+                className="flex h-auto items-center rounded-[10px] px-3 transition-colors duration-300"
+                style={{
+                  background: copied ? 'rgba(var(--color-accent-400), 0.12)' : g.innerBorder,
+                  border: copied
+                    ? '1px solid rgba(var(--color-accent-400), 0.2)'
+                    : `1px solid ${g.trackBg}`,
+                  color: copied ? 'rgb(var(--color-accent-400))' : g.textMuted,
+                }}
+                aria-label={t('subscription.copyLink')}
+                title={t('subscription.copyLink')}
+              >
+                {copied ? <CheckIcon /> : <CopyIcon />}
+              </button>
+            </div>
+          )}
+          {/* ─── Locations ─── */}
+          {subscription.servers && subscription.servers.length > 0 && (
+            <div className="mb-5">
+              <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
+                {t('subscription.locationsLabel')}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {subscription.servers.map((server) => (
+                  <span
+                    key={server.uuid}
+                    className="inline-flex items-center gap-1.5 rounded-[8px] px-2.5 py-1 text-[11px] font-medium text-dark-50/50"
+                    style={{
+                      background: g.innerBorder,
+                      border: `1px solid ${g.trackBg}`,
+                    }}
+                  >
+                    {server.country_code && (
+                      <span className="text-xs">{getFlagEmoji(server.country_code)}</span>
+                    )}
+                    <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                      {server.name}
+                    </Twemoji>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {/* ─── Purchased Traffic Packages ─── */}
+          {subscription.traffic_purchases && subscription.traffic_purchases.length > 0 && (
+            <div className="mb-5">
+              <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
+                {t('subscription.purchasedTraffic')}
+              </div>
+              <div className="space-y-2">
+                {subscription.traffic_purchases.map((purchase) => (
+                  <div
+                    key={purchase.id}
+                    className="rounded-[12px] p-3"
+                    style={{
+                      background: g.innerBg,
+                      border: `1px solid ${g.innerBorder}`,
+                    }}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="flex h-7 w-7 items-center justify-center rounded-[8px]"
+                          style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
+                        >
+                          <DownloadIcon className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-sm font-semibold text-dark-50">
+                          {purchase.traffic_gb} {t('common.units.gb')}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div
+                          className="text-[11px] font-medium"
+                          style={{
+                            color: purchase.days_remaining === 0 ? '#FF6B35' : g.textSecondary,
+                          }}
+                        >
+                          {purchase.days_remaining === 0
+                            ? t('subscription.expired')
+                            : t('subscription.days', { count: purchase.days_remaining })}
+                        </div>
+                        <div className="mt-0.5 font-mono text-[9px] text-dark-400">
+                          {t('subscription.trafficResetAt')}:{' '}
+                          {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="relative h-1.5 overflow-hidden rounded-full"
+                      style={{ background: g.trackBg }}
+                    >
+                      <div
+                        className="absolute inset-0 origin-left rounded-full bg-accent-500 transition-transform duration-500"
+                        style={{
+                          transform: `scaleX(${purchase.progress_percent / 100})`,
+                        }}
+                      />
+                    </div>
+                    <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-400">
+                      <span>{new Date(purchase.created_at).toLocaleDateString(uiLocale())}</span>
+                      <span>{new Date(purchase.expires_at).toLocaleDateString(uiLocale())}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
+      )}
+
       {/* Reissue Subscription — standalone block, not dependent on device_limit */}
       {subscription &&
         (subscription.is_active || subscription.is_limited) &&
@@ -1806,8 +1582,26 @@ export default function Subscription() {
           </div>
         )}
 
-      {/* My Devices Section */}
-      {subscription && <DevicesPanel subscriptionId={subscriptionId} />}
+      {/* Delete expired subscription */}
+      {isMultiTariff &&
+        subscription &&
+        !subscription.is_active &&
+        !subscription.is_trial &&
+        !subscription.is_limited && (
+          <div className="space-y-3">
+            <DeleteSubscriptionSheet
+              subscriptionId={subscription.id}
+              open={showDeleteSheet}
+              onOpen={() => setShowDeleteSheet(true)}
+              onClose={() => setShowDeleteSheet(false)}
+              textSecondary={g.textSecondary}
+              onDeleted={() => {
+                queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+                navigate('/subscriptions', { replace: true });
+              }}
+            />
+          </div>
+        )}
     </div>
   );
 }
