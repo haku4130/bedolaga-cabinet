@@ -6,10 +6,12 @@ import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
+import { useSafeBack } from '../hooks/useSafeBack';
 import { CHECKOUT_PURPOSE } from '../utils/checkout';
 import { Card } from '@/components/data-display/Card';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import PaymentMethodIcon from '@/components/PaymentMethodIcon';
+import { WebBackButton } from '@/components/WebBackButton';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function TopUpMethodSelect() {
@@ -24,6 +26,7 @@ export default function TopUpMethodSelect() {
   });
 
   const isCheckout = searchParams.get('purpose') === CHECKOUT_PURPOSE;
+  const goBack = useSafeBack(isCheckout ? '/' : '/balance');
   const availableMethods = paymentMethods?.filter((method) => method.is_available) ?? [];
   const singleMethodId = availableMethods.length === 1 ? availableMethods[0].id : null;
 
@@ -51,7 +54,8 @@ export default function TopUpMethodSelect() {
       initial="initial"
       animate="animate"
     >
-      <motion.div variants={staggerItem}>
+      <motion.div variants={staggerItem} className="flex items-center gap-3">
+        <WebBackButton onClick={goBack} />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
           {isCheckout ? t('checkout.chooseMethod') : t('balance.selectPaymentMethod')}
         </h1>

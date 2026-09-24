@@ -9,6 +9,8 @@ import { useCurrency } from '../hooks/useCurrency';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import { useHaptic, usePlatform } from '@/platform';
+import { WebBackButton } from '@/components/WebBackButton';
+import { useSafeBack } from '@/hooks/useSafeBack';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import type { PaymentMethod, PaymentMethodOption } from '../types';
 import BentoCard from '../components/ui/BentoCard';
@@ -109,9 +111,7 @@ export default function TopUpAmount() {
   });
   const method = methods?.find((m) => m.id === methodId);
 
-  const handleNavigateBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+  const handleNavigateBack = useSafeBack(isCheckout ? '/' : '/balance');
 
   const handleSuccess = useCallback(() => {
     if (isCheckout) {
@@ -460,6 +460,7 @@ export default function TopUpAmount() {
     >
       {/* Header icon and method */}
       <motion.div variants={staggerItem} className="flex items-center gap-4 pb-1">
+        <WebBackButton onClick={handleNavigateBack} />
         <div
           className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
             isStarsMethod
