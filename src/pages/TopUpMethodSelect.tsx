@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -5,6 +6,7 @@ import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
+import { CHECKOUT_PURPOSE } from '../utils/checkout';
 import { Card } from '@/components/data-display/Card';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import PaymentMethodIcon from '@/components/PaymentMethodIcon';
@@ -21,15 +23,26 @@ export default function TopUpMethodSelect() {
     queryFn: balanceApi.getPaymentMethods,
   });
 
+  const isCheckout = searchParams.get('purpose') === CHECKOUT_PURPOSE;
+  const availableMethods = paymentMethods?.filter((method) => method.is_available) ?? [];
+  const singleMethodId = availableMethods.length === 1 ? availableMethods[0].id : null;
+
   const handleMethodClick = (methodId: string) => {
     const params = new URLSearchParams();
     const amount = searchParams.get('amount');
     const returnTo = searchParams.get('returnTo');
     if (amount) params.set('amount', amount);
     if (returnTo) params.set('returnTo', returnTo);
+    if (isCheckout) params.set('purpose', CHECKOUT_PURPOSE);
     const qs = params.toString();
     navigate(`/balance/top-up/${methodId}${qs ? `?${qs}` : ''}`);
   };
+
+  // Оплата подписки с единственным способом: выбирать нечего — сразу к оплате.
+  useEffect(() => {
+    if (!isCheckout || !singleMethodId) return;
+    navigate(`/balance/top-up/${singleMethodId}?${searchParams.toString()}`, { replace: true });
+  }, [isCheckout, singleMethodId, navigate, searchParams]);
 
   return (
     <motion.div
@@ -40,7 +53,7 @@ export default function TopUpMethodSelect() {
     >
       <motion.div variants={staggerItem}>
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {t('balance.selectPaymentMethod')}
+          {isCheckout ? t('checkout.chooseMethod') : t('balance.selectPaymentMethod')}
         </h1>
       </motion.div>
 

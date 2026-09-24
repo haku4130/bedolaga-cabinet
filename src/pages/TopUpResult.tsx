@@ -13,6 +13,7 @@ import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
 import { loadTopUpPendingInfo, clearTopUpPendingInfo } from '../utils/topUpStorage';
 import { isPaidStatus, isFailedStatus } from '../utils/paymentStatus';
+import { CHECKOUT_STATUS_PATH, loadPendingCheckout } from '../utils/checkout';
 
 // ── Constants ────────────────────────────────────────────────
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
@@ -98,7 +99,8 @@ function FailedState({ amountKopeks }: { amountKopeks: number | null }) {
   const navigate = useNavigate();
 
   const handleTryAgain = useCallback(() => {
-    navigate('/balance', { replace: true });
+    // Платили за подписку — пробуем снова оформить её, а не пополнить баланс.
+    navigate(loadPendingCheckout() ? '/subscription/purchase' : '/balance', { replace: true });
   }, [navigate]);
 
   return (
@@ -319,6 +321,13 @@ export default function TopUpResult() {
       clearTopUpPendingInfo();
     }
   }, [resolvedPaid, resolvedFailed, queryClient, refreshUser]);
+
+  // Платили за подписку — дальше её ждёт страница статуса, а не баланс.
+  useEffect(() => {
+    if (resolvedPaid && loadPendingCheckout()) {
+      navigate(CHECKOUT_STATUS_PATH, { replace: true });
+    }
+  }, [resolvedPaid, navigate]);
 
   // Haptic feedback on status resolution (fire once)
   useEffect(() => {

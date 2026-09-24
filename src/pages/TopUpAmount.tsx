@@ -16,6 +16,12 @@ import { saveTopUpPendingInfo } from '../utils/topUpStorage';
 import { getSafeRedirectPath } from '../utils/safeRedirect';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
 import { getApiErrorMessage } from '../utils/api-error';
+import {
+  CHECKOUT_PURPOSE,
+  CHECKOUT_STATUS_PATH,
+  checkoutPaymentKopeks,
+  loadPendingCheckout,
+} from '../utils/checkout';
 import { copyToClipboard } from '@/utils/clipboard';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
@@ -86,6 +92,9 @@ export default function TopUpAmount() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const returnTo = searchParams.get('returnTo');
+  // Оплата подписки: сумма зафиксирована, после оплаты — страница статуса, а не баланс.
+  const isCheckout = searchParams.get('purpose') === CHECKOUT_PURPOSE;
+  const [pendingCheckout] = useState(() => (isCheckout ? loadPendingCheckout() : null));
   const initialAmountRubles = searchParams.get('amount')
     ? parseFloat(searchParams.get('amount')!)
     : undefined;
@@ -105,13 +114,17 @@ export default function TopUpAmount() {
   }, [navigate]);
 
   const handleSuccess = useCallback(() => {
+    if (isCheckout) {
+      navigate(CHECKOUT_STATUS_PATH, { replace: true });
+      return;
+    }
     // returnTo arrives via query string — validate as an in-app path before
     // navigate(), otherwise an absolute or encoded URL produces ugly
     // path artefacts in the URL bar. The validator returns '/' for invalid
     // input; treat that case as "no returnTo" and use the /balance default.
     const safe = getSafeRedirectPath(returnTo);
     navigate(returnTo && safe !== '/' ? safe : '/balance', { replace: true });
-  }, [navigate, returnTo]);
+  }, [navigate, returnTo, isCheckout]);
 
   // Keyboard: Escape to go back
   useEffect(() => {
@@ -159,10 +172,11 @@ export default function TopUpAmount() {
       const rt = searchParams.get('returnTo');
       if (amount) params.set('amount', amount);
       if (rt) params.set('returnTo', rt);
+      if (isCheckout) params.set('purpose', CHECKOUT_PURPOSE);
       const qs = params.toString();
       navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
     }
-  }, [methods, method, navigate, searchParams]);
+  }, [methods, method, navigate, searchParams, isCheckout]);
 
   useEffect(() => {
     if (!method?.options || method.options.length === 0) {
@@ -262,6 +276,10 @@ export default function TopUpAmount() {
           // ERR_UNKNOWN_URL_SCHEME, iOS opens nothing (bug #654272). Open externally there;
           // on web keep same-tab navigation.
           openPaymentUrl(redirectUrl, platform, openLink);
+          // В Telegram оплата ушла во внешний браузер — здесь ждём её на странице статуса.
+          if (isCheckout && platform === 'telegram') {
+            navigate(CHECKOUT_STATUS_PATH, { replace: true });
+          }
           return;
         }
 
@@ -309,6 +327,31 @@ export default function TopUpAmount() {
   const isStarsMethod = methodKey.includes('stars');
   const methodName =
     t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+
+  const checkoutPayment = isCheckout
+    ? checkoutPaymentKopeks(initialAmountRubles ?? 0, method)
+    : null;
+
+  const handleCheckoutSubmit = () => {
+    if (!checkoutPayment) return;
+    setError(null);
+    setPaymentUrl(null);
+    if (!checkRateLimit(RATE_LIMIT_KEYS.PAYMENT, 3, 30000)) {
+      setError(
+        t('balance.errors.rateLimit', { seconds: getRateLimitResetTime(RATE_LIMIT_KEYS.PAYMENT) }),
+      );
+      return;
+    }
+    if (hasOptions && !selectedOption) {
+      setError(t('balance.errors.selectMethod'));
+      return;
+    }
+    if (isStarsMethod) {
+      starsPaymentMutation.mutate(checkoutPayment.kopeks);
+    } else {
+      topUpMutation.mutate(checkoutPayment.kopeks);
+    }
+  };
 
   const handleSubmit = () => {
     setError(null);
@@ -394,6 +437,7 @@ export default function TopUpAmount() {
     } else {
       openLink(paymentUrl);
     }
+    if (isCheckout) navigate(CHECKOUT_STATUS_PATH, { replace: true });
   };
 
   const handleCopyUrl = async () => {
@@ -426,9 +470,13 @@ export default function TopUpAmount() {
           <div className="flex h-7 w-7 items-center justify-center">{getMethodIcon(method.id)}</div>
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-dark-100">{methodName}</h3>
+          <h3 className="text-lg font-bold text-dark-100">
+            {isCheckout ? t('checkout.paymentTitle') : methodName}
+          </h3>
           <p className="text-sm text-dark-400">
-            {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)} {currencySymbol}
+            {isCheckout
+              ? (pendingCheckout?.label ?? methodName)
+              : `${formatAmount(minRubles, 0)} – ${formatAmount(maxRubles, 0)} ${currencySymbol}`}
           </p>
         </div>
       </motion.div>
@@ -461,103 +509,140 @@ export default function TopUpAmount() {
         </motion.div>
       )}
 
-      {/* Amount input + Submit button - inline */}
-      <motion.div variants={staggerItem} className="space-y-2">
-        <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
-        <div className="flex gap-2">
-          <div
-            className={`relative flex-1 rounded-2xl transition-all duration-200 ${
-              isInputFocused
-                ? 'bg-dark-800 ring-2 ring-accent-500/50'
-                : 'border border-dark-700/50 bg-dark-800/70'
-            }`}
-          >
-            <input
-              ref={inputRef}
-              type="number"
-              inputMode="decimal"
-              enterKeyHint="done"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setQuickRub(null);
-              }}
-              onFocus={() => setIsInputFocused(true)}
-              onBlur={() => setIsInputFocused(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSubmit();
-                }
-              }}
-              placeholder="0"
-              className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
-              autoComplete="off"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-dark-500">
-              {currencySymbol}
+      {isCheckout && checkoutPayment && (
+        <motion.div variants={staggerItem} className="space-y-3">
+          <div className="flex items-center justify-between rounded-2xl border border-dark-700/50 bg-dark-800/70 px-4 py-4">
+            <span className="text-sm text-dark-400">{t('checkout.toPay')}</span>
+            <span className="text-xl font-bold text-dark-50">
+              {formatAmount(checkoutPayment.kopeks / 100)} {currencySymbol}
             </span>
           </div>
+          {checkoutPayment.raisedToMin && (
+            <p className="text-sm text-dark-400">
+              {t('checkout.raisedToMin', {
+                min: `${formatAmount(minRubles, 0)} ${currencySymbol}`,
+                rest: `${formatAmount(checkoutPayment.kopeks / 100 - (initialAmountRubles ?? 0))} ${currencySymbol}`,
+              })}
+            </p>
+          )}
           <button
             type="button"
-            onClick={handleSubmit}
-            disabled={isPending || !amount || parseFloat(amount) <= 0}
-            className={`flex h-14 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 text-base font-bold transition-colors duration-200 ${
-              isPending || !amount || parseFloat(amount) <= 0
-                ? 'cursor-not-allowed bg-dark-700 text-dark-500'
-                : isStarsMethod
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/25 hover:from-yellow-400 hover:to-orange-400 active:from-yellow-600 active:to-orange-600'
-                  : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 transition-colors hover:bg-accent-400 active:bg-accent-600'
-            }`}
+            onClick={handleCheckoutSubmit}
+            disabled={isPending}
+            className="btn-primary flex h-14 w-full items-center justify-center gap-2 text-base font-bold"
           >
             {isPending ? (
               <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
-              <>
-                <SparklesIcon className="h-4 w-4" />
-                <span>{t('balance.topUp')}</span>
-              </>
+              t('checkout.pay', {
+                amount: `${formatAmount(checkoutPayment.kopeks / 100)} ${currencySymbol}`,
+              })
             )}
           </button>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
-      {/* Quick amount buttons */}
-      {quickAmounts.length > 0 && (
-        <motion.div variants={staggerItem} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {quickAmounts.map((a) => {
-            const val = getQuickValue(a);
-            const isSelected = amount === val;
-            return (
-              <BentoCard
-                key={a}
-                as="button"
-                type="button"
-                onClick={() => {
-                  setAmount(val);
-                  setQuickRub(a);
-                  inputRef.current?.blur();
-                }}
-                hover
-                glow={isSelected}
-                className={`flex flex-col items-center justify-center px-2 py-3 ${
-                  isSelected ? 'border-accent-500/50 bg-accent-500/10' : ''
+      {!isCheckout && (
+        <>
+          {/* Amount input + Submit button - inline */}
+          <motion.div variants={staggerItem} className="space-y-2">
+            <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
+            <div className="flex gap-2">
+              <div
+                className={`relative flex-1 rounded-2xl transition-all duration-200 ${
+                  isInputFocused
+                    ? 'bg-dark-800 ring-2 ring-accent-500/50'
+                    : 'border border-dark-700/50 bg-dark-800/70'
                 }`}
               >
-                <span
-                  className={`text-base font-bold ${isSelected ? 'text-accent-400' : 'text-dark-200'}`}
-                >
-                  {formatAmount(a, 0)}
-                </span>
-                <span
-                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400' : 'text-dark-500'}`}
-                >
+                <input
+                  ref={inputRef}
+                  type="number"
+                  inputMode="decimal"
+                  enterKeyHint="done"
+                  value={amount}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setQuickRub(null);
+                  }}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  placeholder="0"
+                  className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
+                  autoComplete="off"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-dark-500">
                   {currencySymbol}
                 </span>
-              </BentoCard>
-            );
-          })}
-        </motion.div>
+              </div>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isPending || !amount || parseFloat(amount) <= 0}
+                className={`flex h-14 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 text-base font-bold transition-colors duration-200 ${
+                  isPending || !amount || parseFloat(amount) <= 0
+                    ? 'cursor-not-allowed bg-dark-700 text-dark-500'
+                    : isStarsMethod
+                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/25 hover:from-yellow-400 hover:to-orange-400 active:from-yellow-600 active:to-orange-600'
+                      : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 transition-colors hover:bg-accent-400 active:bg-accent-600'
+                }`}
+              >
+                {isPending ? (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : (
+                  <>
+                    <SparklesIcon className="h-4 w-4" />
+                    <span>{t('balance.topUp')}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Quick amount buttons */}
+          {quickAmounts.length > 0 && (
+            <motion.div variants={staggerItem} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {quickAmounts.map((a) => {
+                const val = getQuickValue(a);
+                const isSelected = amount === val;
+                return (
+                  <BentoCard
+                    key={a}
+                    as="button"
+                    type="button"
+                    onClick={() => {
+                      setAmount(val);
+                      setQuickRub(a);
+                      inputRef.current?.blur();
+                    }}
+                    hover
+                    glow={isSelected}
+                    className={`flex flex-col items-center justify-center px-2 py-3 ${
+                      isSelected ? 'border-accent-500/50 bg-accent-500/10' : ''
+                    }`}
+                  >
+                    <span
+                      className={`text-base font-bold ${isSelected ? 'text-accent-400' : 'text-dark-200'}`}
+                    >
+                      {formatAmount(a, 0)}
+                    </span>
+                    <span
+                      className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400' : 'text-dark-500'}`}
+                    >
+                      {currencySymbol}
+                    </span>
+                  </BentoCard>
+                );
+              })}
+            </motion.div>
+          )}
+        </>
       )}
 
       {/* Error message */}
