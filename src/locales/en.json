@@ -6780,5 +6780,20 @@
       "language": "Language",
       "theme": "Theme"
     }
+  },
+  "home": {
+    "steps": {
+      "label": "Setup steps",
+      "plan": "Plan",
+      "payment": "Payment",
+      "connect": "Connect"
+    },
+    "tiles": {
+      "balance": "Balance",
+      "invite": "Invite a friend",
+      "inviteStats": "Invited: {{count}} · +{{amount}}",
+      "inviteCommission": "{{percent}}% of friends' payments",
+      "inviteDefault": "Bonuses for friends"
+    }
   }
 }

@@ -7366,5 +7366,20 @@
       "language": "Язык",
       "theme": "Тема оформления"
     }
+  },
+  "home": {
+    "steps": {
+      "label": "Шаги настройки",
+      "plan": "Тариф",
+      "payment": "Оплата",
+      "connect": "Подключение"
+    },
+    "tiles": {
+      "balance": "Баланс",
+      "invite": "Пригласить друга",
+      "inviteStats": "Приглашено: {{count}} · +{{amount}}",
+      "inviteCommission": "{{percent}}% с оплат друзей",
+      "inviteDefault": "Бонусы за друзей"
+    }
   }
 }
