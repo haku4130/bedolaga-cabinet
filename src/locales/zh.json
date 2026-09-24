@@ -6354,5 +6354,31 @@
       "cta": "Activate subscription",
       "dismiss": "Not now"
     }
+  },
+  "connect": {
+    "yourDevice": "Your device",
+    "device": "Device",
+    "changePlatform": "Choose another device",
+    "otherApps": "Other apps ({{count}})",
+    "hideOtherApps": "Hide other apps",
+    "step": "Step {{n}} of {{total}}",
+    "qrLink": "Connect a computer or TV with a QR code",
+    "help": "Not working? Our support will help",
+    "pick": {
+      "title": "Which subscription are we connecting?",
+      "until": "until {{date}}"
+    },
+    "noSub": {
+      "title": "Get a subscription first",
+      "desc": "The VPN works as soon as your subscription is active. Then come back here — we'll show what to install.",
+      "tryFree": "Try for free",
+      "choosePlan": "Choose a plan"
+    },
+    "notReady": {
+      "title": "Connection is still being set up",
+      "desc": "It usually takes a few minutes — this page will refresh by itself.",
+      "help": "Contact support",
+      "adminHint": "Add apps in the admin «Apps» section."
+    }
   }
 }
