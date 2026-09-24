@@ -230,7 +230,13 @@ export function DeviceTopupSheet({
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     </span>
                   ) : toPay > 0 ? (
-                    t('checkout.pay', { amount: formatPrice(toPay) })
+                    t('checkout.pay', {
+                      // Без списания с баланса — та же подпись цены, что над кнопкой.
+                      amount:
+                        fromBalance === 0 && devicePriceData?.total_price_label
+                          ? devicePriceData.total_price_label
+                          : formatPrice(toPay),
+                    })
                   ) : (
                     t('checkout.payFromBalance', { amount: formatPrice(total) })
                   )}

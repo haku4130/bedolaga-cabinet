@@ -6897,7 +6897,8 @@
       "trafficDone": "Traffic added",
       "trafficDoneDesc": "Traffic limit: {{gb}} GB.",
       "trafficDoneUnlimited": "Traffic is now unlimited.",
-      "toSubscription": "To subscription"
+      "toSubscription": "To subscription",
+      "paymentTitle": "Add-on payment"
     }
   },
   "connect": {

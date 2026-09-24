@@ -7487,7 +7487,8 @@
       "trafficDone": "Трафик добавлен",
       "trafficDoneDesc": "Лимит трафика: {{gb}} ГБ.",
       "trafficDoneUnlimited": "Трафик теперь без ограничений.",
-      "toSubscription": "К подписке"
+      "toSubscription": "К подписке",
+      "paymentTitle": "Оплата докупки"
     }
   },
   "connect": {

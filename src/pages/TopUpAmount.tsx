@@ -471,7 +471,11 @@ export default function TopUpAmount() {
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-bold text-dark-100">
-            {isCheckout ? t('checkout.paymentTitle') : methodName}
+            {isCheckout
+              ? pendingCheckout?.kind === 'devices' || pendingCheckout?.kind === 'traffic'
+                ? t('checkout.addon.paymentTitle')
+                : t('checkout.paymentTitle')
+              : methodName}
           </h3>
           <p className="text-sm text-dark-400">
             {isCheckout
