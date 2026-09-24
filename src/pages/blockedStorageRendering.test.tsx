@@ -13,6 +13,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * любом из них уходил в app-level ErrorBoundary, то есть белый экран на всех
  * маршрутах, включая /login: пользователь не мог даже дойти до входа.
  *
+ * Тур (useOnboarding) заменён приветствием — useWelcomeSheet держит тот же
+ * инвариант и проверяется ниже вместо него.
+ *
  * Тест форсирует бросок сам, поэтому краснеет на любой версии node, а не только
  * там, где глобал сломан окружением.
  */
@@ -84,35 +87,35 @@ describe('useTheme при заблокированном localStorage', () => {
   });
 });
 
-describe('useOnboarding при заблокированном localStorage', () => {
-  it('рендерится и считает онбординг непройденным', async () => {
+describe('useWelcomeSheet при заблокированном localStorage', () => {
+  it('рендерится и не показывает приветствие', async () => {
     blockStorage('localStorage');
-    const { useOnboarding } = await import('../components/Onboarding');
+    const { useWelcomeSheet } = await import('../hooks/useWelcomeSheet');
 
     function Probe() {
-      const { isCompleted } = useOnboarding();
-      return <span data-testid="done">{String(isCompleted)}</span>;
+      const { open } = useWelcomeSheet(1, true);
+      return <span data-testid="open">{String(open)}</span>;
     }
 
     render(<Probe />);
 
-    expect(screen.getByTestId('done').textContent).toBe('false');
+    expect(screen.getByTestId('open').textContent).toBe('false');
   });
 
-  it('не бросает при завершении онбординга', async () => {
+  it('не бросает при закрытии', async () => {
     blockStorage('localStorage');
-    const { useOnboarding } = await import('../components/Onboarding');
+    const { useWelcomeSheet } = await import('../hooks/useWelcomeSheet');
 
-    let complete: (() => void) | null = null;
+    let close: (() => void) | null = null;
     function Probe() {
-      const hook = useOnboarding();
-      complete = hook.complete;
-      return <span data-testid="done">{String(hook.isCompleted)}</span>;
+      const hook = useWelcomeSheet(1, true);
+      close = hook.close;
+      return null;
     }
 
     render(<Probe />);
 
-    expect(() => complete?.()).not.toThrow();
+    expect(() => close?.()).not.toThrow();
   });
 });
 

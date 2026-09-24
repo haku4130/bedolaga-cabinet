@@ -6248,32 +6248,6 @@
     "periodDiscount": "{{days}} days",
     "noDiscounts": "No discounts"
   },
-  "onboarding": {
-    "skip": "Skip",
-    "finish": "Finish",
-    "steps": {
-      "welcome": {
-        "title": "Welcome!",
-        "description": "This is your personal cabinet. Here you can manage your subscription, top up balance and connect devices."
-      },
-      "connectDevices": {
-        "title": "Connect Devices",
-        "description": "Click this button to get instructions on how to connect VPN on your devices."
-      },
-      "balance": {
-        "title": "Your Balance",
-        "description": "Your current balance is displayed here. Click to top it up."
-      },
-      "subscription": {
-        "title": "Subscription Status",
-        "description": "Here you can see how many days are left until your subscription expires."
-      },
-      "quickActions": {
-        "title": "Quick Actions",
-        "description": "Use these buttons for quick access to main features: top up balance, extend subscription, and invite friends."
-      }
-    }
-  },
   "promo": {
     "activeDiscount": "Active discount",
     "discountActive": "Discount active!",
@@ -6861,5 +6835,23 @@
       "showAll": "Show all ({{count}})",
       "buyAnother": "Buy another plan"
     }
+  },
+  "welcome": {
+    "title": "Welcome to {{name}}",
+    "subtitle": "Three steps to get your VPN working:",
+    "step1": {
+      "title": "Choose a plan",
+      "desc": "or try it for free"
+    },
+    "step2": {
+      "title": "Pay for the subscription",
+      "desc": "it starts right away"
+    },
+    "step3": {
+      "title": "Connect a device",
+      "desc": "we'll show which app to install"
+    },
+    "start": "Get started",
+    "skip": "I'll figure it out"
   }
 }

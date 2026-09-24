@@ -14,11 +14,13 @@ import { getApiErrorMessage } from '../utils/api-error';
 import { getHomeState, isNewUserState, minPlanPriceKopeks } from '../utils/homeState';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { useTrafficAutoRefresh } from '../hooks/useTrafficAutoRefresh';
+import { useWelcomeSheet } from '../hooks/useWelcomeSheet';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionCardExpired from '../components/dashboard/SubscriptionCardExpired';
 import { HomeHero } from '../components/dashboard/home/HomeHero';
 import { HomeQuickTiles } from '../components/dashboard/home/HomeQuickTiles';
 import { MultiSubscriptionsHero } from '../components/dashboard/home/MultiSubscriptionsHero';
+import { WelcomeSheet } from '../components/dashboard/WelcomeSheet';
 import { ChatIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
@@ -180,6 +182,7 @@ export default function Dashboard() {
   };
 
   const isNewUser = isNewUserState(state);
+  const welcome = useWelcomeSheet(user?.id, isNewUser);
 
   return (
     <div className="mx-auto max-w-xl space-y-5">
@@ -215,6 +218,8 @@ export default function Dashboard() {
           {t('home.support')}
         </Link>
       )}
+
+      <WelcomeSheet open={welcome.open} onClose={welcome.close} />
     </div>
   );
 }

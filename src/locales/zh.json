@@ -5651,32 +5651,6 @@
     "periodDiscount": "{{days}}天",
     "noDiscounts": "无折扣"
   },
-  "onboarding": {
-    "skip": "跳过",
-    "finish": "完成",
-    "steps": {
-      "welcome": {
-        "title": "欢迎！",
-        "description": "这是您的个人中心。在这里您可以管理订阅、充值余额和连接设备。"
-      },
-      "connectDevices": {
-        "title": "连接设备",
-        "description": "点击此按钮获取在您的设备上连接VPN的说明。"
-      },
-      "balance": {
-        "title": "您的余额",
-        "description": "这里显示您的当前余额。点击可充值。"
-      },
-      "subscription": {
-        "title": "订阅状态",
-        "description": "在这里您可以看到订阅的剩余天数。"
-      },
-      "quickActions": {
-        "title": "快捷操作",
-        "description": "使用这些按钮快速访问主要功能：充值余额、延长订阅和邀请好友。"
-      }
-    }
-  },
   "promo": {
     "activeDiscount": "活动折扣",
     "discountActive": "折扣已激活！",
@@ -6327,5 +6301,23 @@
       "showAll": "Show all ({{count}})",
       "buyAnother": "Buy another plan"
     }
+  },
+  "welcome": {
+    "title": "Welcome to {{name}}",
+    "subtitle": "Three steps to get your VPN working:",
+    "step1": {
+      "title": "Choose a plan",
+      "desc": "or try it for free"
+    },
+    "step2": {
+      "title": "Pay for the subscription",
+      "desc": "it starts right away"
+    },
+    "step3": {
+      "title": "Connect a device",
+      "desc": "we'll show which app to install"
+    },
+    "start": "Get started",
+    "skip": "I'll figure it out"
   }
 }

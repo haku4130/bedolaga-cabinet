@@ -5682,32 +5682,6 @@
     "periodDiscount": "{{days}} روز",
     "noDiscounts": "بدون تخفیف"
   },
-  "onboarding": {
-    "skip": "رد کردن",
-    "finish": "پایان",
-    "steps": {
-      "welcome": {
-        "title": "خوش آمدید!",
-        "description": "این کابین شخصی شماست. اینجا می‌توانید اشتراک خود را مدیریت کنید، موجودی شارژ کنید و دستگاه‌ها را متصل کنید."
-      },
-      "connectDevices": {
-        "title": "اتصال دستگاه‌ها",
-        "description": "این دکمه را بزنید تا راهنمای اتصال VPN روی دستگاه‌هایتان را دریافت کنید."
-      },
-      "balance": {
-        "title": "موجودی شما",
-        "description": "موجودی فعلی شما اینجا نمایش داده می‌شود. برای شارژ کلیک کنید."
-      },
-      "subscription": {
-        "title": "وضعیت اشتراک",
-        "description": "اینجا می‌توانید روزهای باقی‌مانده تا انقضای اشتراک را ببینید."
-      },
-      "quickActions": {
-        "title": "دسترسی سریع",
-        "description": "از این دکمه‌ها برای دسترسی سریع به امکانات اصلی استفاده کنید: شارژ موجودی، تمدید اشتراک و دعوت دوستان."
-      }
-    }
-  },
   "promo": {
     "activeDiscount": "تخفیف فعال",
     "discountActive": "تخفیف فعال است!",
@@ -6358,5 +6332,23 @@
       "showAll": "Show all ({{count}})",
       "buyAnother": "Buy another plan"
     }
+  },
+  "welcome": {
+    "title": "Welcome to {{name}}",
+    "subtitle": "Three steps to get your VPN working:",
+    "step1": {
+      "title": "Choose a plan",
+      "desc": "or try it for free"
+    },
+    "step2": {
+      "title": "Pay for the subscription",
+      "desc": "it starts right away"
+    },
+    "step3": {
+      "title": "Connect a device",
+      "desc": "we'll show which app to install"
+    },
+    "start": "Get started",
+    "skip": "I'll figure it out"
   }
 }
