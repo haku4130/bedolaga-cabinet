@@ -6260,6 +6260,62 @@
       "inviteStats": "Invited: {{count}} · +{{amount}}",
       "inviteCommission": "{{percent}}% of friends' payments",
       "inviteDefault": "Bonuses for friends"
+    },
+    "unlimited": "Unlimited",
+    "status": {
+      "active": "Subscription active",
+      "trial": "Trial period"
+    },
+    "daysUnit_one": "day",
+    "daysUnit_other": "days",
+    "until": "until {{date}}",
+    "traffic": "Traffic",
+    "trafficUsage": "{{used}} of {{limit}} GB",
+    "devices": "Devices",
+    "devicesCount": "{{used}} of {{max}}",
+    "devicesUnlimited": "{{used}} · no limit",
+    "daily": {
+      "title": "Daily plan",
+      "desc": "Charged from your balance once a day"
+    },
+    "connectFirst": "One step left: connect a device — the VPN won't work without it. It takes about a minute.",
+    "expiringNote_one": "Your subscription ends in {{count}} day. Renew it so the VPN keeps working.",
+    "expiringNote_other": "Your subscription ends in {{count}} days. Renew it so the VPN keeps working.",
+    "trial": {
+      "title": "Try it for free",
+      "titlePaid": "Trial period",
+      "terms": "{{days}} d · traffic: {{traffic}} · devices: {{devices}}"
+    },
+    "new": {
+      "title": "Choose a plan",
+      "desc": "Pay for a subscription and connect a device with a step-by-step guide."
+    },
+    "expired": {
+      "title": "Subscription ended",
+      "since": "{{date}}",
+      "desc": "The VPN on your devices isn't working right now. Renew and it will start working again — no need to reconnect."
+    },
+    "expiredTrial": {
+      "title": "Trial period ended",
+      "desc": "Choose a plan to keep using the VPN."
+    },
+    "trafficOut": {
+      "title": "Traffic is used up",
+      "desc": "The VPN won't work until the period ends. Buy more traffic or change your plan."
+    },
+    "cta": {
+      "tryFree": "Try for free",
+      "tryPaid": "Try for {{price}}",
+      "choosePlan": "Choose a plan",
+      "choosePlanFrom": "Choose a plan · from {{price}}",
+      "connect": "Connect a device",
+      "connectMore": "Connect another device",
+      "myDevices": "My devices",
+      "renew": "Renew",
+      "manage": "Manage",
+      "otherPlan": "Choose another plan",
+      "buyTraffic": "Buy more traffic",
+      "changePlan": "Change plan"
     }
   }
 }
