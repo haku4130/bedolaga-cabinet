@@ -13,7 +13,6 @@ import { useBranding } from '@/hooks/useBranding';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { resetVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 import { themeColorsApi } from '@/api/themeColors';
-import { subscriptionApi } from '@/api/subscription';
 import { isLogoPreloaded } from '@/api/branding';
 import { cn } from '@/lib/utils';
 
@@ -73,14 +72,7 @@ export function AppShell({ children }: AppShellProps) {
     resetVirtualKeyboard();
   }, [location.pathname]);
 
-  // Мультитариф меняет цель «Устройств» (см. navItems). Ключ общий с главной и
-  // TelegramBackButton — React Query не делает лишнего запроса.
-  const { data: subscriptionsList } = useQuery({
-    queryKey: ['subscriptions-list'],
-    queryFn: () => subscriptionApi.getSubscriptions(),
-    staleTime: 30_000,
-  });
-  const items = navItems({ multiTariff: subscriptionsList?.multi_tariff_enabled ?? false });
+  const items = navItems();
 
   // Нижняя панель живёт только на экранах разделов; на остальных её нет и
   // место под неё не резервируется (data-mobile-nav="off" → --mobile-nav-clearance).

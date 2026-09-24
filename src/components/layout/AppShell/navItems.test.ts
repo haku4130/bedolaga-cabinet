@@ -12,14 +12,16 @@ describe('navItems', () => {
     expect(navItems().map((item) => item.path)).toEqual(['/', '/connection', '/support', '/more']);
   });
 
-  it('в мультитарифе «Устройства» ведут на список подписок: /connection не умеет выбирать подписку', () => {
-    expect(navItems({ multiTariff: true })[1]).toEqual({ key: 'devices', path: '/subscriptions' });
+  it('«Устройства» — всегда страница подключения: подписку выбирают там', () => {
+    expect(navItems()[1]).toEqual({ key: 'devices', path: '/connection' });
   });
 
-  it('TOP_LEVEL_PATHS содержит пути обоих вариантов меню', () => {
-    for (const item of [...navItems(), ...navItems({ multiTariff: true })]) {
-      expect(TOP_LEVEL_PATHS).toContain(item.path);
-    }
+  it('TOP_LEVEL_PATHS — ровно разделы меню', () => {
+    expect([...TOP_LEVEL_PATHS].sort()).toEqual(
+      navItems()
+        .map((item) => item.path)
+        .sort(),
+    );
   });
 });
 

@@ -11,31 +11,17 @@ export interface NavItem {
   readonly path: string;
 }
 
-export interface NavFlags {
-  /**
-   * Мультитариф: у страницы подключения нет выбора подписки, поэтому
-   * «Устройства» ведут на список подписок, где у каждой своя кнопка подключения.
-   */
-  readonly multiTariff?: boolean;
-}
-
-export function navItems({ multiTariff = false }: NavFlags = {}): readonly NavItem[] {
+export function navItems(): readonly NavItem[] {
   return [
     { key: 'dashboard', path: '/' },
-    { key: 'devices', path: multiTariff ? '/subscriptions' : '/connection' },
+    { key: 'devices', path: '/connection' },
     { key: 'support', path: '/support' },
     { key: 'more', path: '/more' },
   ];
 }
 
 /** Корневые экраны: на них Telegram показывает «Закрыть», а не «Назад». */
-export const TOP_LEVEL_PATHS: readonly string[] = [
-  '/',
-  '/connection',
-  '/subscriptions',
-  '/support',
-  '/more',
-];
+export const TOP_LEVEL_PATHS: readonly string[] = ['/', '/connection', '/support', '/more'];
 
 function withoutTrailingSlash(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
