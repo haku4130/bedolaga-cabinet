@@ -6,28 +6,15 @@ import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 import { HIDDEN_UNDER_KEYBOARD, useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 
-import { HomeIcon, SubscriptionIcon, WalletIcon, UsersIcon, ChatIcon, WheelIcon } from './icons';
-import type { MobileNavItem, MobileNavKey } from './mobileNavRoutes';
-
-type NavIcon = React.ComponentType<{ className?: string }>;
-
-const ICONS: Record<MobileNavKey, NavIcon> = {
-  dashboard: HomeIcon,
-  subscription: SubscriptionIcon,
-  balance: WalletIcon,
-  wheel: WheelIcon,
-  referral: UsersIcon,
-  support: ChatIcon,
-};
+import { NAV_ICONS } from './navIcons';
+import type { NavItem } from './navItems';
 
 interface MobileBottomNavProps {
-  /** Экраны панели — из mobileNavItems(); AppShell рендерит панель только на них. */
-  items: readonly MobileNavItem[];
-  /** Открыто выезжающее меню шапки: у него есть все те же пункты, панель поверх него лишняя. */
-  isMenuOpen?: boolean;
+  /** Разделы из navItems(); AppShell рендерит панель только на их экранах. */
+  items: readonly NavItem[];
 }
 
-export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavProps) {
+export function MobileBottomNav({ items }: MobileBottomNavProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { haptic } = usePlatform();
@@ -36,25 +23,18 @@ export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavPr
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  const handleNavClick = () => {
-    haptic.impact('light');
-  };
-
   return (
     <nav
       className={cn(
         'fixed z-50 transition-all duration-200 lg:hidden',
         'bg-dark-900/95 backdrop-blur-linear',
         'border border-dark-700/30',
-        isKeyboardOpen || isMenuOpen ? HIDDEN_UNDER_KEYBOARD : 'opacity-100',
+        isKeyboardOpen ? HIDDEN_UNDER_KEYBOARD : 'opacity-100',
       )}
       style={{
-        // Отступ снизу и просвет под панелью объявлены в globals.css
-        // (--mobile-nav-*): в standalone iOS inset около 34pt, и панель стоит
-        // вплотную к безопасной зоне, в браузере — 16px.
+        // Отступы объявлены в globals.css (--mobile-nav-*): в standalone iOS
+        // панель стоит вплотную к безопасной зоне, в браузере — 16px от края.
         bottom: 'var(--mobile-nav-offset)',
-        // По бокам та же логика: в альбомной ориентации iPhone вырезы слева и
-        // справа около 59pt, панель не должна уходить под чёлку и углы.
         left: 'max(16px, env(safe-area-inset-left, 0px))',
         right: 'max(16px, env(safe-area-inset-right, 0px))',
         borderRadius: 'var(--bento-radius, 24px)',
@@ -64,18 +44,20 @@ export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavPr
     >
       <div className="flex justify-around">
         {items.map((item) => {
-          const Icon = ICONS[item.key];
+          const Icon = NAV_ICONS[item.key];
+          const active = isActive(item.path);
           return (
             <Link
-              key={item.path}
+              key={item.key}
               to={item.path}
-              onClick={handleNavClick}
+              onClick={() => haptic.impact('light')}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'relative flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200',
-                isActive(item.path) ? 'text-accent-400' : 'text-dark-400 hover:text-dark-200',
+                'relative flex min-w-[64px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200',
+                active ? 'text-accent-400' : 'text-dark-400 hover:text-dark-200',
               )}
             >
-              {isActive(item.path) && (
+              {active && (
                 <motion.div
                   layoutId="bottom-nav-active"
                   className="absolute inset-0 rounded-2xl bg-accent-500/15"

@@ -20,6 +20,7 @@ import { TooltipProvider } from './components/primitives/Tooltip';
 import { isInTelegramWebApp, closeTelegramApp } from './hooks/useTelegramSDK';
 import { getFallbackParentPath } from './utils/navigation';
 import { subscriptionApi } from './api/subscription';
+import { TOP_LEVEL_PATHS } from './components/layout/AppShell/navItems';
 import { useBlockingStore } from './store/blocking';
 
 const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as const;
@@ -28,8 +29,6 @@ const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as 
  * Manages Telegram BackButton visibility based on navigation location.
  * Shows back button on non-root routes, hides on root.
  */
-/** Pages reachable from bottom nav — treat as top-level (no back button). */
-const BOTTOM_NAV_PATHS = ['/', '/subscriptions', '/balance', '/referral', '/support', '/wheel'];
 
 /** Matches /subscriptions/:numericId. When the user has a single tariff and at
  * most one subscription, the /subscriptions list auto-redirects straight back
@@ -108,7 +107,7 @@ function TelegramBackButton() {
       } catch {}
       return;
     }
-    const isTopLevel = location.pathname === '' || BOTTOM_NAV_PATHS.includes(location.pathname);
+    const isTopLevel = location.pathname === '' || TOP_LEVEL_PATHS.includes(location.pathname);
     // Depth-independent on purpose: whether the user deep-linked in or navigated
     // here in-app, a single-tariff detail whose list just bounces back has no
     // real "back" target. Showing Back here is exactly what looped through the

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -10,10 +10,10 @@ import { useTelegramSDK } from '@/hooks/useTelegramSDK';
 import { useHeaderHeight } from '@/hooks/useHeaderHeight';
 import { useTheme } from '@/hooks/useTheme';
 import { useBranding } from '@/hooks/useBranding';
-import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { resetVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 import { themeColorsApi } from '@/api/themeColors';
+import { subscriptionApi } from '@/api/subscription';
 import { isLogoPreloaded } from '@/api/branding';
 import { cn } from '@/lib/utils';
 
@@ -23,23 +23,11 @@ import SuccessNotificationModal from '@/components/SuccessNotificationModal';
 import { PromptDialogHost } from '@/components/PromptDialogHost';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
-import {
-  SubscriptionIcon,
-  GiftIcon,
-  HomeIcon,
-  CreditCardIcon,
-  ChatIcon,
-  UserIcon,
-  UsersIcon,
-  ShieldIcon,
-  InfoIcon,
-  LogoutIcon,
-  SunIcon,
-  MoonIcon,
-} from '@/components/icons';
+import { ShieldIcon, LogoutIcon, SunIcon, MoonIcon } from '@/components/icons';
 
 import { MobileBottomNav } from './MobileBottomNav';
-import { isMobileNavScreen, mobileNavItems } from './mobileNavRoutes';
+import { isNavScreen, navItems } from './navItems';
+import { NAV_ICONS } from './navIcons';
 import { AppHeader } from './AppHeader';
 import { useBackgroundConsumer } from '@/components/backgrounds/BackgroundHost';
 
@@ -60,7 +48,6 @@ export function AppShell({ children }: AppShellProps) {
 
   // Extracted hooks
   const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
-  const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
   useScrollRestoration();
   // Анимированный фон рендерит BackgroundHost в App (не перемонтируется при
   // смене роута) — здесь только регистрируем, что на этом роуте он нужен.
@@ -77,8 +64,6 @@ export function AppShell({ children }: AppShellProps) {
   // Only apply fullscreen UI adjustments on mobile Telegram (iOS/Android)
   const isMobileFullscreen = isFullscreen && isMobile;
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   // Смена экрана закрывает сигнал «клавиатура открыта» (useVirtualKeyboard):
   // поле с фокусом размонтировано, blur не приходит, и прижатые к низу элементы
   // иначе остаются спрятанными.
@@ -87,22 +72,24 @@ export function AppShell({ children }: AppShellProps) {
     resetVirtualKeyboard();
   }, [location.pathname]);
 
-  // Нижняя панель живёт только на экранах своих кнопок; на остальных её нет и
-  // место под неё не резервируется (data-mobile-nav="off" → --mobile-nav-clearance).
-  const navItems = mobileNavItems({ wheelEnabled, referralEnabled });
-  const showMobileNav = isMobileNavScreen(location.pathname, navItems);
+  // Мультитариф меняет цель «Устройств» (см. navItems). Ключ общий с главной и
+  // TelegramBackButton — React Query не делает лишнего запроса.
+  const { data: subscriptionsList } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 30_000,
+  });
+  const items = navItems({ multiTariff: subscriptionsList?.multi_tariff_enabled ?? false });
 
-  // Desktop navigation — labels always visible (no hover-reveal gimmick)
-  const desktopNav = [
-    { path: '/', label: t('nav.dashboard'), icon: HomeIcon },
-    { path: '/subscriptions', label: t('nav.subscription'), icon: SubscriptionIcon },
-    { path: '/balance', label: t('nav.balance'), icon: CreditCardIcon },
-    ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
-    ...(giftEnabled ? [{ path: '/gift', label: t('nav.gift'), icon: GiftIcon }] : []),
-    { path: '/support', label: t('nav.support'), icon: ChatIcon },
-    { path: '/info', label: t('nav.info'), icon: InfoIcon },
-    { path: '/profile', label: t('nav.profile'), icon: UserIcon },
-  ];
+  // Нижняя панель живёт только на экранах разделов; на остальных её нет и
+  // место под неё не резервируется (data-mobile-nav="off" → --mobile-nav-clearance).
+  const showMobileNav = isNavScreen(location.pathname, items);
+
+  const desktopNav = items.map((item) => ({
+    path: item.path,
+    label: t(`nav.${item.key}`),
+    icon: NAV_ICONS[item.key],
+  }));
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -257,19 +244,10 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile Header */}
       <AppHeader
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-        onCommandPaletteOpen={() => {}}
-        headerHeight={headerHeight}
         isFullscreen={isMobileFullscreen}
         safeAreaInset={safeAreaInset}
         contentSafeAreaInset={contentSafeAreaInset}
         telegramPlatform={platform}
-        wheelEnabled={wheelEnabled}
-        referralEnabled={referralEnabled}
-        hasContests={hasContests}
-        hasPolls={hasPolls}
-        giftEnabled={giftEnabled}
       />
 
       {/* Desktop spacer */}
@@ -287,7 +265,7 @@ export function AppShell({ children }: AppShellProps) {
       </main>
 
       {/* Mobile Bottom Navigation — только на экранах её кнопок */}
-      {showMobileNav && <MobileBottomNav items={navItems} isMenuOpen={mobileMenuOpen} />}
+      {showMobileNav && <MobileBottomNav items={items} />}
     </div>
   );
 }
