@@ -7440,6 +7440,16 @@
       "otherPlan": "Выбрать другой тариф",
       "buyTraffic": "Докупить трафик",
       "changePlan": "Сменить тариф"
+    },
+    "greeting": "Привет, {{name}}!",
+    "greetingNoName": "Привет!",
+    "newSubtitle": "Настроим VPN — это займёт пару минут",
+    "support": "Есть вопрос? Напишите в поддержку",
+    "multi": {
+      "title": "Подписки",
+      "manageAll": "Все подписки",
+      "showAll": "Показать все ({{count}})",
+      "buyAnother": "Купить ещё тариф"
     }
   }
 }

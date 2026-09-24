@@ -6316,6 +6316,16 @@
       "otherPlan": "Choose another plan",
       "buyTraffic": "Buy more traffic",
       "changePlan": "Change plan"
+    },
+    "greeting": "Hi, {{name}}!",
+    "greetingNoName": "Hi!",
+    "newSubtitle": "Let's set up your VPN — it takes a couple of minutes",
+    "support": "Have a question? Contact support",
+    "multi": {
+      "title": "Subscriptions",
+      "manageAll": "All subscriptions",
+      "showAll": "Show all ({{count}})",
+      "buyAnother": "Buy another plan"
     }
   }
 }
