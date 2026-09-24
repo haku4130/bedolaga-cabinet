@@ -53,7 +53,9 @@
     "wheel": "幸运转盘",
     "menu": "菜单",
     "gift": "赠送",
-    "navigation": "导航"
+    "navigation": "导航",
+    "devices": "Devices",
+    "more": "More"
   },
   "notifications": {
     "ticketNotifications": "工单通知",

@@ -53,7 +53,9 @@
     "wheel": "Fortune Wheel",
     "menu": "Menu",
     "gift": "Gift",
-    "navigation": "Navigation"
+    "navigation": "Navigation",
+    "devices": "Devices",
+    "more": "More"
   },
   "notifications": {
     "ticketNotifications": "Ticket Notifications",

@@ -53,7 +53,9 @@
     "wheel": "Колесо удачи",
     "menu": "Меню",
     "gift": "Подарить",
-    "navigation": "Навигация"
+    "navigation": "Навигация",
+    "devices": "Устройства",
+    "more": "Ещё"
   },
   "notifications": {
     "ticketNotifications": "Уведомления о тикетах",
