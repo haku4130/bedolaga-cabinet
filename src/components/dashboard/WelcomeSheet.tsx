@@ -13,16 +13,18 @@ const STEPS: { key: 'step1' | 'step2' | 'step3'; icon: ComponentType<{ className
 interface WelcomeSheetProps {
   open: boolean;
   onClose: () => void;
+  /** Бесплатный пробный период доступен — тогда первый шаг упоминает его. */
+  freeTrial: boolean;
 }
 
 /** Первое знакомство: три шага до работающего VPN вместо тура по плиткам. */
-export function WelcomeSheet({ open, onClose }: WelcomeSheetProps) {
+export function WelcomeSheet({ open, onClose, freeTrial }: WelcomeSheetProps) {
   const { t } = useTranslation();
   const { appName } = useBranding();
 
   return (
     <ResponsiveSheet isOpen={open} onClose={onClose} title={t('welcome.title', { name: appName })}>
-      <div className="space-y-5">
+      <div className="space-y-5 px-6 pb-6 pt-4 sm:px-5 sm:pt-0">
         <p className="text-[15px] text-dark-300">{t('welcome.subtitle')}</p>
         <ol className="space-y-3.5">
           {STEPS.map(({ key, icon: Icon }) => (
@@ -34,7 +36,9 @@ export function WelcomeSheet({ open, onClose }: WelcomeSheetProps) {
                 <span className="text-[15px] font-semibold text-dark-50">
                   {t(`welcome.${key}.title`)}
                 </span>
-                <span className="text-sm text-dark-400">{t(`welcome.${key}.desc`)}</span>
+                {(key !== 'step1' || freeTrial) && (
+                  <span className="text-sm text-dark-400">{t(`welcome.${key}.desc`)}</span>
+                )}
               </span>
             </li>
           ))}

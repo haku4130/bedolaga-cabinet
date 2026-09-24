@@ -259,7 +259,7 @@ export default function Dashboard() {
         </Link>
       )}
 
-      <WelcomeSheet open={welcome.open} onClose={welcome.close} />
+      <WelcomeSheet open={welcome.open} onClose={welcome.close} freeTrial={state === 'new_trial'} />
     </div>
   );
 }
