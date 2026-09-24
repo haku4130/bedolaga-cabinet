@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TOP_LEVEL_PATHS, isNavScreen, navItems } from './navItems';
+import { TOP_LEVEL_PATHS, isNavScreen, moreSectionParent, navItems } from './navItems';
 
 /**
  * Одно меню на все платформы: нижний бар на телефоне и шапка на десктопе
@@ -45,6 +45,31 @@ describe('isNavScreen', () => {
       '/admin',
     ]) {
       expect(isNavScreen(path, items), path).toBe(false);
+    }
+  });
+});
+
+describe('moreSectionParent', () => {
+  it('страницы, куда ведёт «Ещё», возвращают туда же', () => {
+    for (const path of [
+      '/balance',
+      '/referral',
+      '/wheel',
+      '/gift',
+      '/contests',
+      '/polls',
+      '/info',
+      '/profile',
+      '/news',
+    ]) {
+      expect(moreSectionParent(path), path).toBe('/more');
+    }
+    expect(moreSectionParent('/balance/')).toBe('/more');
+  });
+
+  it('их вложенные экраны и разделы меню — нет: у них своя навигация', () => {
+    for (const path of ['/', '/more', '/connection', '/balance/top-up', '/info/faq']) {
+      expect(moreSectionParent(path), path).toBeNull();
     }
   });
 });

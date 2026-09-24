@@ -46,3 +46,25 @@ export function isNavScreen(pathname: string, items: readonly NavItem[]): boolea
   const path = withoutTrailingSlash(pathname);
   return items.some((item) => item.path === path);
 }
+
+/**
+ * Страницы, куда ведут пункты «Ещё». Раньше часть из них была в меню и своей
+ * кнопки «Назад» не имеет, а нижнего бара на них теперь нет. Оболочка сама
+ * показывает на них возврат в «Ещё» (и Telegram BackButton возвращает туда же).
+ */
+const MORE_SECTION_PATHS: readonly string[] = [
+  '/balance',
+  '/referral',
+  '/wheel',
+  '/gift',
+  '/contests',
+  '/polls',
+  '/info',
+  '/profile',
+  '/news',
+];
+
+/** Куда возвращаться со страницы раздела «Ещё»; null — это не такая страница. */
+export function moreSectionParent(pathname: string): string | null {
+  return MORE_SECTION_PATHS.includes(withoutTrailingSlash(pathname)) ? '/more' : null;
+}

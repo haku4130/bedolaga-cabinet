@@ -21,12 +21,13 @@ import WebSocketNotifications from '@/components/WebSocketNotifications';
 import CampaignBonusNotifier from '@/components/CampaignBonusNotifier';
 import SuccessNotificationModal from '@/components/SuccessNotificationModal';
 import { PromptDialogHost } from '@/components/PromptDialogHost';
+import { WebBackButton } from '@/components/WebBackButton';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
 import { ShieldIcon, LogoutIcon, SunIcon, MoonIcon } from '@/components/icons';
 
 import { MobileBottomNav } from './MobileBottomNav';
-import { isNavScreen, navItems } from './navItems';
+import { isNavScreen, moreSectionParent, navItems } from './navItems';
 import { NAV_ICONS } from './navIcons';
 import { AppHeader } from './AppHeader';
 import { useBackgroundConsumer } from '@/components/backgrounds/BackgroundHost';
@@ -84,6 +85,8 @@ export function AppShell({ children }: AppShellProps) {
   // Нижняя панель живёт только на экранах разделов; на остальных её нет и
   // место под неё не резервируется (data-mobile-nav="off" → --mobile-nav-clearance).
   const showMobileNav = isNavScreen(location.pathname, items);
+  // Страницы из «Ещё» без своей кнопки «Назад» — возврат рисует оболочка (в Telegram — нативный).
+  const moreParent = moreSectionParent(location.pathname);
 
   const desktopNav = items.map((item) => ({
     path: item.path,
@@ -261,6 +264,11 @@ export function AppShell({ children }: AppShellProps) {
           просвет под панелью: фиксированные 112px в standalone iOS не хватало,
           и низ контента уходил под неё. */}
       <main className="mx-auto max-w-6xl py-6 pb-[calc(var(--mobile-nav-clearance)+0.5rem)] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] lg:px-6 lg:pb-8">
+        {moreParent && (
+          <div className="mb-4">
+            <WebBackButton to={moreParent} />
+          </div>
+        )}
         {children}
       </main>
 

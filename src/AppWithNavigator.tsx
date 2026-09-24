@@ -20,7 +20,7 @@ import { TooltipProvider } from './components/primitives/Tooltip';
 import { isInTelegramWebApp, closeTelegramApp } from './hooks/useTelegramSDK';
 import { getFallbackParentPath } from './utils/navigation';
 import { subscriptionApi } from './api/subscription';
-import { TOP_LEVEL_PATHS } from './components/layout/AppShell/navItems';
+import { TOP_LEVEL_PATHS, moreSectionParent } from './components/layout/AppShell/navItems';
 import { useBlockingStore } from './store/blocking';
 
 const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as const;
@@ -155,7 +155,7 @@ function TelegramBackButton() {
     const fallback =
       SUBSCRIPTION_DETAIL_RE.test(pathname) && !listIsSafe
         ? '/'
-        : getFallbackParentPath(pathnameRef.current);
+        : (moreSectionParent(pathnameRef.current) ?? getFallbackParentPath(pathnameRef.current));
     navigateRef.current(fallback, { replace: true });
   }, []);
 
