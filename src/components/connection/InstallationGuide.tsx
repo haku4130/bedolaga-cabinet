@@ -12,7 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { CardsBlock, TimelineBlock, AccordionBlock, MinimalBlock, BlockButtons } from './blocks';
 import type { BlockRendererProps, RenderBlock } from './blocks';
 import TvQuickConnect from './TvQuickConnect';
-import { BackIcon, BookOpenIcon, ChevronIcon } from '@/components/icons';
+import { BackIcon, BookOpenIcon, ChevronIcon, DevicesIcon } from '@/components/icons';
 
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV'];
 
@@ -46,7 +46,8 @@ interface Props {
   appConfig: AppConfig;
   onOpenDeepLink: (url: string) => void;
   isTelegramWebApp: boolean;
-  onGoBack: () => void;
+  /** «Назад» — только если на страницу пришли по ссылке; вкладка меню — без неё. */
+  onGoBack?: () => void;
   onOpenQR?: () => void;
   username?: string;
 }
@@ -166,6 +167,28 @@ export default function InstallationGuide({
     : undefined;
   const currentPlatformApps = currentPlatformData?.apps || [];
 
+  // Прочие приложения платформы свёрнуты: сначала одно — рекомендованное или выбранное.
+  const [showOtherApps, setShowOtherApps] = useState(false);
+  const otherAppsCount = currentPlatformApps.filter((app) => app.name !== selectedApp?.name).length;
+  const visibleApps = showOtherApps
+    ? currentPlatformApps
+    : currentPlatformApps.filter((app) => app.name === selectedApp?.name);
+
+  const handlePlatformChange = (newPlatform: string) => {
+    setActivePlatformKey(newPlatform);
+    setShowOtherApps(false);
+    const data = appConfig.platforms[newPlatform] as RemnawavePlatformData | undefined;
+    if (data?.apps?.length) {
+      // Keep the user's current app (by name) if it also exists on the
+      // new platform; only fall back to featured/first otherwise.
+      const app =
+        data.apps.find((a) => a.name === selectedApp?.name) ||
+        data.apps.find((a) => a.featured) ||
+        data.apps[0];
+      if (app) setSelectedApp(app);
+    }
+  };
+
   // Platform display name
   const getPlatformDisplayName = useCallback(
     (key: string): string => {
@@ -217,7 +240,7 @@ export default function InstallationGuide({
     <div className="space-y-6 pb-6">
       {/* Header + platform dropdown */}
       <div className="flex items-center gap-3">
-        {!isTelegramWebApp && (
+        {!isTelegramWebApp && onGoBack && (
           <button
             onClick={onGoBack}
             aria-label={t('common.back', 'Back')}
@@ -255,80 +278,99 @@ export default function InstallationGuide({
             </svg>
           </button>
         )}
-        {availablePlatforms.length > 1 && (
-          <div className="relative flex items-center">
-            {currentPlatformSvg && (
-              <div
-                className="pointer-events-none absolute left-3 z-10 h-5 w-5 text-dark-400 [&>svg]:h-full [&>svg]:w-full"
+      </div>
+
+      {/* «Ваше устройство»: определённая платформа и выбор другой */}
+      {currentPlatformKey && (
+        <div className="flex items-center gap-3 rounded-2xl border border-dark-700/50 bg-dark-800/50 p-3.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark-900/60 text-accent-400">
+            {currentPlatformSvg ? (
+              <span
+                className="h-5 w-5 [&>svg]:h-full [&>svg]:w-full"
                 dangerouslySetInnerHTML={{ __html: currentPlatformSvg }}
               />
+            ) : (
+              <DevicesIcon className="h-5 w-5" />
             )}
-            <select
-              value={currentPlatformKey || ''}
-              onChange={(e) => {
-                const newPlatform = e.target.value;
-                setActivePlatformKey(newPlatform);
-                const data = appConfig.platforms[newPlatform] as RemnawavePlatformData | undefined;
-                if (data?.apps?.length) {
-                  // Keep the user's current app (by name) if it also exists on the
-                  // new platform; only fall back to featured/first otherwise.
-                  const app =
-                    data.apps.find((a) => a.name === selectedApp?.name) ||
-                    data.apps.find((a) => a.featured) ||
-                    data.apps[0];
-                  if (app) setSelectedApp(app);
-                }
-              }}
-              className={`appearance-none rounded-xl border py-2 pr-8 text-sm font-medium outline-none transition-colors ${
-                isLight
-                  ? 'border-dark-700/60 bg-white/80 text-dark-200 shadow-sm hover:border-dark-600'
-                  : 'border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600'
-              } ${currentPlatformSvg ? 'pl-10' : 'pl-4'}`}
-            >
-              {availablePlatforms.map((p) => (
-                <option key={p} value={p}>
-                  {getPlatformDisplayName(p)}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute right-2.5 text-dark-400">
-              <ChevronIcon className="h-4 w-4" />
-            </div>
-          </div>
-        )}
-      </div>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs text-dark-400">
+              {currentPlatformKey === detectedPlatform
+                ? t('connect.yourDevice')
+                : t('connect.device')}
+            </span>
+            <span className="block truncate text-base font-semibold text-dark-50">
+              {getPlatformDisplayName(currentPlatformKey)}
+            </span>
+          </span>
+          {availablePlatforms.length > 1 && (
+            <label className="relative flex items-center">
+              <span className="sr-only">{t('connect.changePlatform')}</span>
+              <select
+                value={currentPlatformKey}
+                onChange={(e) => handlePlatformChange(e.target.value)}
+                className="appearance-none rounded-xl border border-dark-700 bg-dark-800 py-2 pl-3 pr-8 text-sm font-medium text-dark-200 outline-none transition-colors hover:border-dark-600"
+              >
+                {availablePlatforms.map((p) => (
+                  <option key={p} value={p}>
+                    {getPlatformDisplayName(p)}
+                  </option>
+                ))}
+              </select>
+              <span className="pointer-events-none absolute right-2.5 text-dark-400">
+                <ChevronIcon className="h-4 w-4" />
+              </span>
+            </label>
+          )}
+        </div>
+      )}
 
       {/* App chips */}
       {currentPlatformApps.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {currentPlatformApps.map((app, idx) => {
-            const isSelected = selectedApp?.name === app.name;
-            const appIconSvg = getSvgHtml(app.svgIconKey);
-            return (
-              <button
-                key={app.name + idx}
-                onClick={() => setSelectedApp(app)}
-                className={`relative flex min-w-[calc(50%-0.25rem)] items-center gap-2 overflow-hidden rounded-xl px-4 py-2 text-sm font-medium transition-all active:scale-[0.97] ${
-                  isSelected
-                    ? isLight
-                      ? 'bg-accent-500/15 text-accent-600 ring-1 ring-accent-500/40'
-                      : 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/40'
-                    : isLight
-                      ? 'border border-dark-700/60 bg-white/80 text-dark-200 shadow-sm hover:border-dark-600/50 hover:bg-white'
-                      : 'border border-dark-700/50 bg-dark-800/80 text-dark-200 hover:border-dark-600/50 hover:bg-dark-700/80'
-                }`}
-              >
-                {app.featured && <span className="h-2 w-2 shrink-0 rounded-full bg-warning-400" />}
-                <span className="relative z-10 truncate">{app.name}</span>
-                {appIconSvg && (
-                  <div
-                    className="ml-auto h-7 w-7 shrink-0 opacity-30 [&>svg]:h-full [&>svg]:w-full"
-                    dangerouslySetInnerHTML={{ __html: appIconSvg }}
-                  />
-                )}
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {visibleApps.map((app, idx) => {
+              const isSelected = selectedApp?.name === app.name;
+              const appIconSvg = getSvgHtml(app.svgIconKey);
+              return (
+                <button
+                  key={app.name + idx}
+                  onClick={() => setSelectedApp(app)}
+                  className={`relative flex min-w-[calc(50%-0.25rem)] items-center gap-2 overflow-hidden rounded-xl px-4 py-2 text-sm font-medium transition-all active:scale-[0.97] ${
+                    isSelected
+                      ? isLight
+                        ? 'bg-accent-500/15 text-accent-600 ring-1 ring-accent-500/40'
+                        : 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/40'
+                      : isLight
+                        ? 'border border-dark-700/60 bg-white/80 text-dark-200 shadow-sm hover:border-dark-600/50 hover:bg-white'
+                        : 'border border-dark-700/50 bg-dark-800/80 text-dark-200 hover:border-dark-600/50 hover:bg-dark-700/80'
+                  }`}
+                >
+                  {app.featured && (
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-warning-400" />
+                  )}
+                  <span className="relative z-10 truncate">{app.name}</span>
+                  {appIconSvg && (
+                    <div
+                      className="ml-auto h-7 w-7 shrink-0 opacity-30 [&>svg]:h-full [&>svg]:w-full"
+                      dangerouslySetInnerHTML={{ __html: appIconSvg }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {otherAppsCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowOtherApps((value) => !value)}
+              className="min-h-[36px] text-sm font-medium text-accent-400 hover:text-accent-300"
+            >
+              {showOtherApps
+                ? t('connect.hideOtherApps')
+                : t('connect.otherApps', { count: otherAppsCount })}
+            </button>
+          )}
         </div>
       )}
 
@@ -356,6 +398,7 @@ export default function InstallationGuide({
           getLocalizedText={getLocalizedText}
           getSvgHtml={getSvgHtml}
           renderBlockButtons={renderBlockButtons}
+          stepLabel={(index, total) => t('connect.step', { n: index + 1, total })}
         />
       )}
     </div>

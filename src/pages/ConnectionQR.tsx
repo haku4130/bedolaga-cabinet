@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { useBranding } from '../hooks/useBranding';
-import { AdminBackButton } from '@/components/admin';
+import { WebBackButton } from '@/components/WebBackButton';
 
 interface ConnectionQRState {
   url: string;
@@ -41,7 +41,7 @@ export default function ConnectionQR() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-center gap-3">
-        <AdminBackButton to={connectionPath} replace />
+        <WebBackButton to={connectionPath} replace />
         <h1 className="text-2xl font-bold text-dark-100">{t('subscription.connection.qrTitle')}</h1>
       </div>
 

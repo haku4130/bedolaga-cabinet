@@ -6,20 +6,32 @@ import { openLink as sdkOpenLink } from '@telegram-apps/sdk-react';
 import { subscriptionApi } from '../api/subscription';
 import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
-import { SettingsIcon } from '@/components/icons';
+import { ChatIcon, ScanIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
 import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
 import InstallationGuide from '../components/connection/InstallationGuide';
+import {
+  ConnectionNoSubscription,
+  ConnectionNotReady,
+  ConnectionSubscriptionPicker,
+} from '../components/connection/ConnectionStates';
+import { DevicesPanel } from '../components/subscription/DevicesPanel';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+
+function appHasApps(config: AppConfig): boolean {
+  return Object.values(config.platforms ?? {}).some(
+    (p: RemnawavePlatformData) => p.apps && p.apps.length > 0,
+  );
+}
 
 export default function Connection() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const subId = searchParams.get('sub') ? Number(searchParams.get('sub')) : undefined;
+  const subIdParam = searchParams.get('sub') ? Number(searchParams.get('sub')) : undefined;
   const user = useAuthStore((state) => state.user);
   const isAdmin = useAuthStore((state) => state.isAdmin);
   const { isTelegramWebApp } = useTelegramSDK();
@@ -28,6 +40,18 @@ export default function Connection() {
   const hapticRef = useRef(hapticImpact);
   hapticRef.current = hapticImpact;
 
+  const { data: subsList, isLoading: subsLoading } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 30_000,
+  });
+  const isMultiTariff = subsList?.multi_tariff_enabled ?? false;
+  const subscriptions = subsList?.subscriptions ?? [];
+  // Мультитариф: с одной подпиской выбирать нечего, с несколькими — спрашиваем.
+  const subId =
+    subIdParam ?? (isMultiTariff && subscriptions.length === 1 ? subscriptions[0].id : undefined);
+  const needsPick = isMultiTariff && subIdParam === undefined && subscriptions.length > 1;
+
   const {
     data: appConfig,
     isLoading,
@@ -35,12 +59,24 @@ export default function Connection() {
   } = useQuery<AppConfig>({
     queryKey: ['appConfig', subId],
     queryFn: () => subscriptionApi.getAppConfig(subId),
+    enabled: !subsLoading && !needsPick,
+    // Пока подключение не настроено — проверяем снова, а не просим «загляните позже».
+    refetchInterval: (query) =>
+      query.state.status === 'error' || (query.state.data && !appHasApps(query.state.data))
+        ? 10_000
+        : false,
   });
   const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
     queryKey: ['connectionLink', subId],
     queryFn: () => subscriptionApi.getConnectionLink(subId),
     retry: false,
     staleTime: 0,
+    enabled: !subsLoading && !needsPick,
+  });
+  const { data: trialInfo } = useQuery({
+    queryKey: ['trial-info'],
+    queryFn: () => subscriptionApi.getTrialInfo(),
+    enabled: appConfig?.hasSubscription === false,
   });
 
   const qrConnectionUrl = useMemo(
@@ -160,14 +196,13 @@ export default function Connection() {
   );
 
   // Check if any platform has configured apps
-  const hasApps = useMemo(() => {
-    if (!appConfig?.platforms) return false;
-    return Object.values(appConfig.platforms).some(
-      (p: RemnawavePlatformData) => p.apps && p.apps.length > 0,
-    );
-  }, [appConfig?.platforms]);
+  const hasApps = useMemo(() => (appConfig ? appHasApps(appConfig) : false), [appConfig]);
 
-  if (isLoading || isConnectionLinkLoading) {
+  if (needsPick) {
+    return <ConnectionSubscriptionPicker subscriptions={subscriptions} />;
+  }
+
+  if (subsLoading || isLoading || isConnectionLinkLoading) {
     return (
       <SkeletonGroup className="space-y-6 pb-6">
         {/* Повторяет шапку InstallationGuide: кнопка «назад», заголовок, выбор платформы. */}
@@ -182,64 +217,46 @@ export default function Connection() {
   }
 
   if (error || !appConfig || !hasApps) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-          <svg
-            className="h-8 w-8 text-dark-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-            />
-          </svg>
-        </div>
-        <h3 className="mb-2 text-xl font-bold text-dark-100">
-          {t('subscription.connection.notConfigured')}
-        </h3>
-        <p className="mb-6 max-w-sm text-dark-400">
-          {isAdmin
-            ? t('subscription.connection.notConfiguredAdmin')
-            : t('subscription.connection.notConfiguredUser')}
-        </p>
-        {isAdmin && (
-          <Link to="/admin/apps" className="btn-primary inline-flex items-center gap-2 px-6 py-2.5">
-            <SettingsIcon className="h-4 w-4" />
-            {t('subscription.connection.goToApps')}
-          </Link>
-        )}
-      </div>
-    );
+    return <ConnectionNotReady isAdmin={isAdmin} />;
   }
 
   // No subscription
   if (!appConfig.hasSubscription) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-        <h3 className="mb-2 text-xl font-bold text-dark-100">
-          {t('subscription.connection.title')}
-        </h3>
-        <p className="mb-4 text-dark-400">{t('subscription.connection.noSubscription')}</p>
-        <button onClick={handleGoBack} className="btn-primary px-6 py-2">
-          {t('common.close')}
-        </button>
-      </div>
-    );
+    return <ConnectionNoSubscription trialAvailable={trialInfo?.is_available === true} />;
   }
 
   return (
-    <InstallationGuide
-      appConfig={appConfig}
-      onOpenDeepLink={openDeepLink}
-      isTelegramWebApp={isTelegramWebApp}
-      onGoBack={handleGoBack}
-      onOpenQR={handleOpenQR}
-      username={user?.username ?? undefined}
-    />
+    <div className="space-y-6">
+      <InstallationGuide
+        appConfig={appConfig}
+        onOpenDeepLink={openDeepLink}
+        isTelegramWebApp={isTelegramWebApp}
+        // «Назад» — только если пришли по ссылке (с главной, после оплаты);
+        // вкладка «Устройства» — раздел меню, возвращаться с неё некуда.
+        onGoBack={subIdParam !== undefined ? handleGoBack : undefined}
+        onOpenQR={handleOpenQR}
+        username={user?.username ?? undefined}
+      />
+      <div className="space-y-1">
+        {qrConnectionUrl && (
+          <button
+            type="button"
+            onClick={handleOpenQR}
+            className="flex min-h-[44px] w-full items-center gap-2.5 text-left text-[15px] font-medium text-accent-400 hover:text-accent-300"
+          >
+            <ScanIcon className="h-[18px] w-[18px]" />
+            {t('connect.qrLink')}
+          </button>
+        )}
+        <Link
+          to="/support"
+          className="flex min-h-[44px] items-center gap-2.5 text-[15px] font-medium text-accent-400 hover:text-accent-300"
+        >
+          <ChatIcon className="h-[18px] w-[18px]" />
+          {t('connect.help')}
+        </Link>
+      </div>
+      <DevicesPanel subscriptionId={subId} />
+    </div>
   );
 }
