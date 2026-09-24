@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { deviceUnavailableText } from '../deviceReasons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage } from '../../../utils/subscriptionHelpers';
-import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
+import { useCheckout } from '../../../hooks/useCheckout';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
 
@@ -40,7 +40,8 @@ export function DeviceTopupSheet({
   isDark,
 }: DeviceTopupSheetProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
+  // «Оплатить»: с баланса или недостающее у провайдера — без «пополните баланс».
+  const checkout = useCheckout();
 
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
@@ -51,19 +52,6 @@ export function DeviceTopupSheet({
     queryKey: ['device-price', devicesToAdd, subscriptionId],
     queryFn: () => subscriptionApi.getDevicePrice(devicesToAdd, subscriptionId),
     enabled: open && !!subscription,
-  });
-
-  const devicePurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseDevices(devicesToAdd, subscriptionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
-      queryClient.invalidateQueries({ queryKey: ['device-price'] });
-      queryClient.invalidateQueries({ queryKey: ['balance'] });
-      onClose();
-      onDevicesToAddChange(1);
-    },
   });
 
   if (!open) {
@@ -202,47 +190,58 @@ export function DeviceTopupSheet({
             </div>
           )}
 
-          {/* Insufficient balance */}
-          {devicePriceData?.available &&
-            purchaseOptions &&
-            devicePriceData.total_price_kopeks &&
-            devicePriceData.total_price_kopeks > purchaseOptions.balance_kopeks && (
-              <InsufficientBalancePrompt
-                missingAmountKopeks={
-                  devicePriceData.total_price_kopeks - purchaseOptions.balance_kopeks
-                }
-                compact
-                onBeforeTopUp={async () => {
-                  await subscriptionApi.saveDevicesCart(devicesToAdd, subscriptionId);
-                }}
-              />
-            )}
+          {(() => {
+            const total = devicePriceData?.total_price_kopeks ?? 0;
+            const fromBalance = Math.min(purchaseOptions?.balance_kopeks ?? 0, total);
+            const toPay = total - fromBalance;
+            return (
+              <>
+                {fromBalance > 0 && toPay > 0 && (
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between text-dark-300">
+                      <span>{t('checkout.fromBalance')}</span>
+                      <span>−{formatPrice(fromBalance)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-dark-100">
+                      <span>{t('checkout.toPay')}</span>
+                      <span>{formatPrice(toPay)}</span>
+                    </div>
+                  </div>
+                )}
+                <button
+                  onClick={() =>
+                    checkout.start({
+                      kind: 'devices',
+                      tariffId: subscription.tariff_id ?? null,
+                      subscriptionId: subscriptionId ?? subscription.id,
+                      periodDays: 0,
+                      trafficGb: null,
+                      devices: devicesToAdd,
+                      label: `${subscription.tariff_name ?? t('subscription.defaultName', 'Подписка')} · ${t('checkout.addon.devicesLabel', { count: devicesToAdd })}`,
+                      priceKopeks: total,
+                      pay: () => subscriptionApi.purchaseDevices(devicesToAdd, subscriptionId),
+                    })
+                  }
+                  disabled={checkout.isPending || !devicePriceData?.available}
+                  className="btn-primary w-full py-3"
+                >
+                  {checkout.isPending ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    </span>
+                  ) : toPay > 0 ? (
+                    t('checkout.pay', { amount: formatPrice(toPay) })
+                  ) : (
+                    t('checkout.payFromBalance', { amount: formatPrice(total) })
+                  )}
+                </button>
+              </>
+            );
+          })()}
 
-          <button
-            onClick={() => devicePurchaseMutation.mutate()}
-            disabled={
-              devicePurchaseMutation.isPending ||
-              !devicePriceData?.available ||
-              !!(
-                devicePriceData?.total_price_kopeks &&
-                purchaseOptions &&
-                devicePriceData.total_price_kopeks > purchaseOptions.balance_kopeks
-              )
-            }
-            className="btn-primary w-full py-3"
-          >
-            {devicePurchaseMutation.isPending ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              </span>
-            ) : (
-              t('subscription.additionalOptions.buy')
-            )}
-          </button>
-
-          {devicePurchaseMutation.isError && (
+          {checkout.error != null && (
             <div className="text-center text-sm text-error-400">
-              {getErrorMessage(devicePurchaseMutation.error)}
+              {getErrorMessage(checkout.error)}
             </div>
           )}
         </div>

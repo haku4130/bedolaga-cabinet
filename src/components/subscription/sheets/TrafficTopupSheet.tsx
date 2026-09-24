@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage } from '../../../utils/subscriptionHelpers';
-import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
+import { useCheckout } from '../../../hooks/useCheckout';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
 
@@ -39,7 +39,8 @@ export function TrafficTopupSheet({
   isDark,
 }: TrafficTopupSheetProps) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
+  // «Оплатить»: с баланса или недостающее у провайдера — без «пополните баланс».
+  const checkout = useCheckout();
 
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
@@ -50,18 +51,6 @@ export function TrafficTopupSheet({
     queryKey: ['traffic-packages', subscriptionId],
     queryFn: () => subscriptionApi.getTrafficPackages(subscriptionId),
     enabled: open && !!subscription,
-  });
-
-  const purchaseMutation = useMutation({
-    mutationFn: (gb: number) => subscriptionApi.purchaseTraffic(gb, subscriptionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      queryClient.invalidateQueries({ queryKey: ['balance'] });
-      queryClient.invalidateQueries({ queryKey: ['traffic-packages', subscriptionId] });
-      onClose();
-      onSelectedTrafficPackageChange(null);
-    },
   });
 
   if (!open) {
@@ -164,54 +153,63 @@ export function TrafficTopupSheet({
           {selectedTrafficPackage !== null &&
             (() => {
               const selectedPkg = trafficPackages.find((p) => p.gb === selectedTrafficPackage);
-              const hasEnoughBalance =
-                !selectedPkg ||
-                !purchaseOptions ||
-                selectedPkg.price_kopeks <= purchaseOptions.balance_kopeks;
-              const missingAmount =
-                selectedPkg && purchaseOptions
-                  ? selectedPkg.price_kopeks - purchaseOptions.balance_kopeks
-                  : 0;
+              const total = selectedPkg?.price_kopeks ?? 0;
+              const fromBalance = Math.min(purchaseOptions?.balance_kopeks ?? 0, total);
+              const toPay = total - fromBalance;
 
               return (
                 <>
-                  {!hasEnoughBalance && missingAmount > 0 && (
-                    <InsufficientBalancePrompt
-                      missingAmountKopeks={missingAmount}
-                      compact
-                      className="mb-3"
-                      onBeforeTopUp={async () => {
-                        await subscriptionApi.saveTrafficCart(
-                          selectedTrafficPackage,
-                          subscriptionId,
-                        );
-                      }}
-                    />
+                  {fromBalance > 0 && toPay > 0 && (
+                    <div className="mb-3 space-y-1 text-sm">
+                      <div className="flex justify-between text-dark-300">
+                        <span>{t('checkout.fromBalance')}</span>
+                        <span>−{formatPrice(fromBalance)}</span>
+                      </div>
+                      <div className="flex justify-between font-medium text-dark-100">
+                        <span>{t('checkout.toPay')}</span>
+                        <span>{formatPrice(toPay)}</span>
+                      </div>
+                    </div>
                   )}
                   <button
-                    onClick={() => purchaseMutation.mutate(selectedTrafficPackage)}
-                    disabled={purchaseMutation.isPending || !hasEnoughBalance}
+                    onClick={() =>
+                      checkout.start({
+                        kind: 'traffic',
+                        tariffId: subscription.tariff_id ?? null,
+                        subscriptionId: subscriptionId ?? subscription.id,
+                        periodDays: 0,
+                        trafficGb: selectedTrafficPackage,
+                        devices: null,
+                        label: `${subscription.tariff_name ?? t('subscription.defaultName', 'Подписка')} · ${
+                          selectedPkg?.is_unlimited
+                            ? t('checkout.addon.trafficUnlimitedLabel')
+                            : t('checkout.addon.trafficLabel', { gb: selectedTrafficPackage })
+                        }`,
+                        priceKopeks: total,
+                        pay: () =>
+                          subscriptionApi.purchaseTraffic(selectedTrafficPackage, subscriptionId),
+                      })
+                    }
+                    disabled={checkout.isPending || !selectedPkg}
                     className="btn-primary w-full py-3"
                   >
-                    {purchaseMutation.isPending ? (
+                    {checkout.isPending ? (
                       <span className="flex items-center justify-center gap-2">
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                       </span>
-                    ) : selectedPkg?.is_unlimited ? (
-                      t('subscription.additionalOptions.buyUnlimited')
+                    ) : toPay > 0 ? (
+                      t('checkout.pay', { amount: formatPrice(toPay) })
                     ) : (
-                      t('subscription.additionalOptions.buyTrafficGb', {
-                        gb: selectedTrafficPackage,
-                      })
+                      t('checkout.payFromBalance', { amount: formatPrice(total) })
                     )}
                   </button>
                 </>
               );
             })()}
 
-          {purchaseMutation.isError && (
+          {checkout.error != null && (
             <div className="text-center text-sm text-error-400">
-              {getErrorMessage(purchaseMutation.error)}
+              {getErrorMessage(checkout.error)}
             </div>
           )}
         </div>
