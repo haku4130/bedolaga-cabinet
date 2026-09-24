@@ -6,6 +6,7 @@ import type { PurchaseOptions, Subscription, TrialInfo } from '@/types';
  */
 export type HomeStateKind =
   | 'loading'
+  | 'checkout_ready'
   | 'gift_pending'
   | 'multi'
   | 'new_trial'
@@ -22,7 +23,7 @@ export type HomeStateKind =
 /** Состояния, которые рисует HomeHero; остальные Dashboard рисует сам. */
 export type HeroState = Exclude<
   HomeStateKind,
-  'loading' | 'gift_pending' | 'multi' | 'daily_inactive'
+  'loading' | 'checkout_ready' | 'gift_pending' | 'multi' | 'daily_inactive'
 >;
 
 export type HomeSubscription = Pick<
@@ -46,6 +47,8 @@ export interface HomeStateInput {
   trial: Pick<TrialInfo, 'is_available' | 'requires_payment'> | undefined;
   /** undefined — ещё не загружено. */
   connectedDevices: number | undefined;
+  /** Деньги за запомненную покупку пришли, а подписка не продлилась. */
+  checkoutReady: boolean;
 }
 
 /** С какого остатка дней предлагаем продлить (если автопродление выключено). */
@@ -55,6 +58,7 @@ export function getHomeState(input: HomeStateInput): HomeStateKind {
   const sub = input.subscription;
 
   if (input.isLoading) return 'loading';
+  if (input.checkoutReady) return 'checkout_ready';
   if (input.hasPendingGifts) return 'gift_pending';
   if (input.multiTariff && input.multiSubscriptionsCount > 0) return 'multi';
 

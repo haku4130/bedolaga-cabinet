@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,11 @@ import { giftApi } from '../api/gift';
 import { API } from '../config/constants';
 import { getApiErrorMessage } from '../utils/api-error';
 import { getHomeState, isNewUserState, minPlanPriceKopeks } from '../utils/homeState';
+import {
+  clearPendingCheckout,
+  loadPendingCheckout,
+  resolveCheckoutStatus,
+} from '../utils/checkout';
 import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { useTrafficAutoRefresh } from '../hooks/useTrafficAutoRefresh';
 import { useWelcomeSheet } from '../hooks/useWelcomeSheet';
@@ -21,6 +26,7 @@ import { HomeHero } from '../components/dashboard/home/HomeHero';
 import { HomeQuickTiles } from '../components/dashboard/home/HomeQuickTiles';
 import { MultiSubscriptionsHero } from '../components/dashboard/home/MultiSubscriptionsHero';
 import { WelcomeSheet } from '../components/dashboard/WelcomeSheet';
+import { CheckoutReadyHero } from '../components/dashboard/home/CheckoutReadyHero';
 import { ChatIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
@@ -135,6 +141,29 @@ export default function Dashboard() {
     },
   });
 
+  // Запомненная покупка: подписка продлилась — забываем; деньги пришли, а
+  // подписка нет — предлагаем оформить первым делом.
+  const [pendingCheckout, setPendingCheckout] = useState(() => loadPendingCheckout());
+  const checkoutStatus = useMemo(
+    () =>
+      pendingCheckout && multiSubData
+        ? resolveCheckoutStatus({
+            pending: pendingCheckout,
+            subscriptions: multiSubData.subscriptions ?? [],
+            balanceKopeks: balanceData?.balance_kopeks,
+            now: Date.now(),
+            openedAt: Date.now(),
+          }).status
+        : null,
+    [pendingCheckout, multiSubData, balanceData?.balance_kopeks],
+  );
+  useEffect(() => {
+    if (checkoutStatus === 'done') {
+      clearPendingCheckout();
+      setPendingCheckout(null);
+    }
+  }, [checkoutStatus]);
+
   const state = getHomeState({
     isLoading:
       subLoading || (isMultiTariff && !multiSubData) || (hasNoSubscription && trialLoading),
@@ -144,6 +173,7 @@ export default function Dashboard() {
     subscription,
     trial: trialInfo,
     connectedDevices: devicesData?.total,
+    checkoutReady: checkoutStatus === 'confirm',
   });
 
   const firstName = user?.first_name || displayName(user);
@@ -152,6 +182,16 @@ export default function Dashboard() {
     switch (state) {
       case 'loading':
         return <HeroSkeleton />;
+      case 'checkout_ready':
+        return pendingCheckout ? (
+          <CheckoutReadyHero
+            pending={pendingCheckout}
+            onDismiss={() => {
+              clearPendingCheckout();
+              setPendingCheckout(null);
+            }}
+          />
+        ) : null;
       case 'gift_pending':
         return <PendingGiftCard gifts={pendingGifts ?? []} />;
       case 'multi':

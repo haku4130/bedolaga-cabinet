@@ -22,6 +22,7 @@ const base: HomeStateInput = {
   subscription: null,
   trial: undefined,
   connectedDevices: undefined,
+  checkoutReady: false,
 };
 
 const sub = (overrides: Partial<HomeSubscription> = {}): HomeSubscription => ({
@@ -41,6 +42,16 @@ const state = (overrides: Partial<HomeStateInput>) => getHomeState({ ...base, ..
 describe('getHomeState — приоритеты', () => {
   it('загрузка важнее всего', () => {
     expect(state({ isLoading: true, hasPendingGifts: true })).toBe('loading');
+  });
+
+  it('деньги за подписку на балансе — первым делом оформить', () => {
+    expect(state({ checkoutReady: true, hasPendingGifts: true, subscription: sub() })).toBe(
+      'checkout_ready',
+    );
+  });
+
+  it('загрузка всё равно важнее', () => {
+    expect(state({ checkoutReady: true, isLoading: true })).toBe('loading');
   });
 
   it('непринятый подарок важнее подписки', () => {
