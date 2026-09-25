@@ -48,10 +48,14 @@ export function formatPrice(kopeks: number, lang?: string): string {
   // Для IRR суммы большие — без дробной части.
   const maximumFractionDigits = config.currency === 'IRR' ? 0 : 2;
 
+  // Нулевые копейки не пишем: «109 ₽», а не «109,00 ₽».
+  const whole = Number.isInteger(Math.round(amount * 100) / 100);
+
   try {
     return new Intl.NumberFormat(config.locale, {
       style: 'currency',
       currency: config.currency,
+      minimumFractionDigits: whole ? 0 : maximumFractionDigits,
       maximumFractionDigits,
     }).format(amount);
   } catch {

@@ -6,6 +6,7 @@ import { getErrorMessage } from '../../../utils/subscriptionHelpers';
 import { useCheckout } from '../../../hooks/useCheckout';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
+import { tidyPriceLabel } from '@/utils/priceFormat';
 
 // ──────────────────────────────────────────────────────────────────
 // Buy-devices sheet. Self-owns its devicePrice query + purchase mutation;
@@ -156,10 +157,12 @@ export function DeviceTopupSheet({
                     <span className="text-dark-500 line-through">
                       {formatPrice(devicePriceData.original_price_per_device_kopeks)}
                     </span>
-                    <span className="mx-1">{devicePriceData.price_per_device_label}</span>
+                    <span className="mx-1">
+                      {tidyPriceLabel(devicePriceData.price_per_device_label)}
+                    </span>
                   </span>
                 ) : (
-                  devicePriceData.price_per_device_label
+                  tidyPriceLabel(devicePriceData.price_per_device_label)
                 )}
                 /{t('subscription.perDevice').replace('/ ', '')} (
                 {t('subscription.days', { count: devicePriceData.days_left })})
@@ -184,7 +187,7 @@ export function DeviceTopupSheet({
                         {formatPrice(devicePriceData.base_total_price_kopeks)}
                       </span>
                     )}
-                  {devicePriceData.total_price_label}
+                  {tidyPriceLabel(devicePriceData.total_price_label)}
                 </div>
               )}
             </div>
@@ -234,7 +237,7 @@ export function DeviceTopupSheet({
                       // Без списания с баланса — та же подпись цены, что над кнопкой.
                       amount:
                         fromBalance === 0 && devicePriceData?.total_price_label
-                          ? devicePriceData.total_price_label
+                          ? tidyPriceLabel(devicePriceData.total_price_label)
                           : formatPrice(toPay),
                     })
                   ) : (

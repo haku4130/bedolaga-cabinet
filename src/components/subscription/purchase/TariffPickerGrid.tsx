@@ -6,15 +6,16 @@ import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { dailyPriceQuote } from './dailyPrice';
 import { getGlassColors } from '../../../utils/glassTheme';
-import { ArrowDownIcon, DevicesIcon, RestartIcon } from '@/components/icons';
+import { DevicesIcon, RestartIcon, TrafficIcon } from '@/components/icons';
+import { hasPromoGroupDiscount } from '@/utils/promoGroupDiscount';
 import type { Tariff, Subscription, PurchaseOptions } from '../../../types';
 
 // ──────────────────────────────────────────────────────────────────
 // TariffPickerGrid
 //
 // The tariff selection surface inside SubscriptionPurchase. Renders:
-//   - an optional promo-group banner when any tariff carries a
-//     promo_group_name
+//   - an optional promo-group banner when the user's group actually
+//     discounts something (the name alone arrives for every group)
 //   - the "all tariffs purchased" empty state (multi-tariff mode)
 //   - the grid itself (1 col mobile, 2 cols sm+) with promo prices,
 //     per-tariff CTAs differentiated by user state (extend / switch /
@@ -58,7 +59,7 @@ export function TariffPickerGrid({
   return (
     <>
       {/* Promo group discount banner */}
-      {tariffs.some((tariff) => tariff.promo_group_name) && (
+      {tariffs.some((tariff) => tariff.promo_group_name) && hasPromoGroupDiscount(tariffs) && (
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 p-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-500/20 text-success-400">
             <svg
@@ -187,8 +188,12 @@ export function TariffPickerGrid({
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-1.5">
-                    <ArrowDownIcon className="h-4 w-4 text-accent-400" />
-                    <span className="font-medium text-dark-200">{tariff.traffic_limit_label}</span>
+                    <TrafficIcon className="h-4 w-4 text-accent-400" />
+                    <span className="font-medium text-dark-200">
+                      {tariff.is_unlimited_traffic || tariff.traffic_limit_gb === 0
+                        ? t('subscription.tariffCard.unlimitedTraffic')
+                        : t('subscription.tariffCard.trafficGb', { gb: tariff.traffic_limit_gb })}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <DevicesIcon className="h-4 w-4 text-dark-400" />
@@ -198,14 +203,18 @@ export function TariffPickerGrid({
                         : t('subscription.devices', { count: tariff.device_limit })}
                     </span>
                   </div>
-                  {tariff.traffic_reset_mode && tariff.traffic_reset_mode !== 'NO_RESET' && (
-                    <div className="flex items-center gap-1.5">
-                      <RestartIcon className="h-4 w-4 text-dark-400" />
-                      <span className="text-dark-300">
-                        {t(`subscription.trafficReset.${tariff.traffic_reset_mode}`)}
-                      </span>
-                    </div>
-                  )}
+                  {/* Сброс трафика имеет смысл только у лимитного тарифа. */}
+                  {tariff.traffic_reset_mode &&
+                    tariff.traffic_reset_mode !== 'NO_RESET' &&
+                    !tariff.is_unlimited_traffic &&
+                    tariff.traffic_limit_gb !== 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <RestartIcon className="h-4 w-4 text-dark-400" />
+                        <span className="text-dark-300">
+                          {t(`subscription.trafficReset.${tariff.traffic_reset_mode}`)}
+                        </span>
+                      </div>
+                    )}
                 </div>
                 {/* Price info */}
                 <div className="mt-3 border-t border-dark-700/50 pt-3 text-sm text-dark-400">

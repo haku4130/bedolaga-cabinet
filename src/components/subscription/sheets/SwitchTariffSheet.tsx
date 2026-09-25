@@ -11,6 +11,7 @@ import { dailyPriceQuote } from '../purchase/dailyPrice';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff } from '../../../types';
 import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
+import { tidyPriceLabel } from '@/utils/priceFormat';
 
 // ──────────────────────────────────────────────────────────────────
 // SwitchTariffSheet
@@ -207,7 +208,7 @@ export function SwitchTariffSheet({
                     className={`text-lg font-bold ${switchPreview.upgrade_cost_kopeks === 0 ? 'text-success-400' : 'text-accent-400'}`}
                   >
                     {switchPreview.upgrade_cost_kopeks > 0
-                      ? switchPreview.upgrade_cost_label
+                      ? tidyPriceLabel(switchPreview.upgrade_cost_label)
                       : t('subscription.switchTariff.free')}
                   </span>
                 </div>

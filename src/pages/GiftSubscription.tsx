@@ -1,3 +1,4 @@
+import { hasPromoGroupDiscount } from '@/utils/promoGroupDiscount';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -588,7 +589,7 @@ function BuyTabContent({
       )}
 
       {/* Promo group banner */}
-      {config.promo_group_name && (
+      {config.promo_group_name && hasPromoGroupDiscount(config.tariffs) && (
         <div className="flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 p-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success-500/20">
             <SparklesIcon className="h-4 w-4 text-success-400" />
