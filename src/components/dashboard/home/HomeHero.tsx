@@ -37,6 +37,7 @@ export function HomeHero(props: HomeHeroProps) {
       );
     case 'expired':
     case 'expired_trial':
+    case 'disabled':
     case 'traffic_exhausted':
       return subscription ? (
         <ProblemHero

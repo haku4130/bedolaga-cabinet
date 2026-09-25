@@ -699,6 +699,10 @@
     "trialUpgrade": {
       "description": "您的试用期即将结束。请选择合适的套餐，以继续无限制使用 VPN。",
       "title": "升级订阅"
+    },
+    "tariffCard": {
+      "unlimitedTraffic": "Unlimited traffic",
+      "trafficGb": "{{gb}} GB of traffic"
     }
   },
   "balance": {
@@ -6289,7 +6293,8 @@
       "manage": "Manage",
       "otherPlan": "Choose another plan",
       "buyTraffic": "Buy more traffic",
-      "changePlan": "Change plan"
+      "changePlan": "Change plan",
+      "contactSupport": "Message support"
     },
     "greeting": "Hi, {{name}}!",
     "greetingNoName": "Hi!",
@@ -6300,6 +6305,10 @@
       "manageAll": "All subscriptions",
       "showAll": "Show all ({{count}})",
       "buyAnother": "Buy another plan"
+    },
+    "disabled": {
+      "title": "Subscription disabled",
+      "desc": "VPN isn't working on your devices right now. Message support — we'll explain what happened and help turn it back on."
     }
   },
   "welcome": {

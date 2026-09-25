@@ -6,7 +6,7 @@ import { PrimaryLink, SecondaryLink } from './heroActions';
 import { useHomeFormat } from './useHomeFormat';
 
 interface ProblemHeroProps {
-  state: 'expired' | 'expired_trial' | 'traffic_exhausted';
+  state: 'expired' | 'expired_trial' | 'disabled' | 'traffic_exhausted';
   subscription: Subscription;
   minPlanPriceKopeks: number | null;
 }
@@ -36,6 +36,10 @@ export function ProblemHero({ state, subscription: sub, minPlanPriceKopeks }: Pr
     secondary = (
       <SecondaryLink to="/subscription/purchase">{t('home.cta.otherPlan')}</SecondaryLink>
     );
+  } else if (state === 'disabled') {
+    title = t('home.disabled.title');
+    description = t('home.disabled.desc');
+    primary = <PrimaryLink to="/support">{t('home.cta.contactSupport')}</PrimaryLink>;
   } else if (state === 'expired_trial') {
     title = t('home.expiredTrial.title');
     description = t('home.expiredTrial.desc');

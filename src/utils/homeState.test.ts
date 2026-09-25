@@ -91,10 +91,15 @@ describe('getHomeState — подписка не работает', () => {
     );
   });
 
-  it('истекла или отключена', () => {
+  it('истекла', () => {
     expect(state({ subscription: sub({ is_expired: true }) })).toBe('expired');
-    expect(state({ subscription: sub({ status: 'disabled' }) })).toBe('expired');
     expect(state({ subscription: sub({ status: 'expired' }) })).toBe('expired');
+  });
+
+  it('отключена — продлить её нельзя, отдельное состояние', () => {
+    expect(state({ subscription: sub({ status: 'disabled' }) })).toBe('disabled');
+    expect(state({ subscription: sub({ status: 'disabled', is_expired: true }) })).toBe('disabled');
+    expect(state({ subscription: sub({ status: 'disabled', is_trial: true }) })).toBe('disabled');
   });
 
   it('суточный тариф на паузе или истёкший — своя карточка с мгновенным продлением', () => {

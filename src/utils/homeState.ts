@@ -14,6 +14,7 @@ export type HomeStateKind =
   | 'new'
   | 'expired_trial'
   | 'daily_inactive'
+  | 'disabled'
   | 'expired'
   | 'traffic_exhausted'
   | 'expiring'
@@ -74,6 +75,9 @@ export function getHomeState(input: HomeStateInput): HomeStateKind {
   // Суточному тарифу нечего выбирать: его карточка продлевает/снимает с паузы
   // в один клик (SubscriptionCardExpired), и эту логику мы не дублируем.
   if (sub.is_daily && (inactive || sub.is_daily_paused || sub.is_limited)) return 'daily_inactive';
+  // Отключённую (админом, за выход из канала, антиабуз) бот не продлевает —
+  // «Продлить» тут тупик, нужен человек из поддержки.
+  if (sub.status === 'disabled') return 'disabled';
   if (sub.is_trial && inactive) return 'expired_trial';
   if (inactive) return 'expired';
   if (sub.is_limited) return 'traffic_exhausted';

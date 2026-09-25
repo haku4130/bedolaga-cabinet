@@ -800,7 +800,11 @@
     "statusActive": "Активна",
     "statusExpired": "Истекла",
     "statusLimited": "Ограничена",
-    "statusTrial": "Триал"
+    "statusTrial": "Триал",
+    "tariffCard": {
+      "unlimitedTraffic": "Безлимитный трафик",
+      "trafficGb": "{{gb}} ГБ трафика"
+    }
   },
   "balance": {
     "title": "Баланс",
@@ -7413,7 +7417,8 @@
       "manage": "Управление",
       "otherPlan": "Выбрать другой тариф",
       "buyTraffic": "Докупить трафик",
-      "changePlan": "Сменить тариф"
+      "changePlan": "Сменить тариф",
+      "contactSupport": "Написать в поддержку"
     },
     "greeting": "Привет, {{name}}!",
     "greetingNoName": "Привет!",
@@ -7424,6 +7429,10 @@
       "manageAll": "Все подписки",
       "showAll": "Показать все ({{count}})",
       "buyAnother": "Купить ещё тариф"
+    },
+    "disabled": {
+      "title": "Подписка отключена",
+      "desc": "VPN на ваших устройствах сейчас не работает. Напишите в поддержку — расскажем, что случилось, и поможем включить."
     }
   },
   "welcome": {

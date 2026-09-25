@@ -192,6 +192,14 @@ describe('подписка не работает', () => {
     );
   });
 
+  it('отключена — в поддержку, без «Продлить»', async () => {
+    const { primary } = await renderHero('disabled', {
+      subscription: subscription({ status: 'disabled' }),
+    });
+    expect(primary.getAttribute('href')).toBe('/support');
+    expect(screen.queryByTestId('home-secondary')).toBeNull();
+  });
+
   it('истёк триал — выбрать тариф', async () => {
     const { primary } = await renderHero('expired_trial', {
       subscription: subscription({ is_trial: true, is_expired: true, days_left: 0 }),
