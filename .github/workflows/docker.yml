@@ -67,8 +67,8 @@ jobs:
           build-args: |
             VITE_API_URL=/api
             VITE_TELEGRAM_BOT_USERNAME=
-            VITE_APP_NAME=Cabinet
-            VITE_APP_LOGO=V
+            VITE_APP_NAME=ZanityVPN
+            VITE_APP_LOGO=Z
 
       # Сканируем запушенный образ на CVE. Пока non-blocking (exit-code: 0):
       # находки уезжают в Security → Code scanning, но сборку не роняют.
