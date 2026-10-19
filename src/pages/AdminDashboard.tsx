@@ -55,9 +55,12 @@ function LocationCardView({ location }: LocationCardViewProps) {
         </div>
         <div className="shrink-0 text-right">
           {location.users === null ? (
-            <div className="text-sm text-dark-500">
-              — <span className="sr-only">{t('adminDashboard.locations.noData')}</span>
-            </div>
+            <>
+              <div aria-hidden="true" className="text-2xl font-bold text-dark-500">
+                —
+              </div>
+              <div className="text-xs text-dark-500">{t('adminDashboard.locations.noData')}</div>
+            </>
           ) : (
             <div className="text-2xl font-bold text-dark-100">{location.users}</div>
           )}
