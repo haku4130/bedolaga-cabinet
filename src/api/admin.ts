@@ -193,6 +193,28 @@ export interface NodesOverview {
   nodes: NodeStatus[];
 }
 
+export interface LocationExit {
+  name: string;
+  users: number;
+}
+
+export interface LocationCard {
+  title: string;
+  node_name: string | null;
+  inbound_tag: string | null;
+  // null — нет данных; 0 — настоящий ноль
+  users: number | null;
+  exits: LocationExit[];
+  source: 'counter' | 'panel' | null;
+  reported_at: string | null;
+}
+
+export interface LocationsOverview {
+  window_seconds: number;
+  generated_at: string;
+  locations: LocationCard[];
+}
+
 export interface RevenueData {
   date: string;
   amount_kopeks: number;
@@ -347,6 +369,12 @@ export const statsApi = {
   // Get nodes status
   getNodesStatus: async (): Promise<NodesOverview> => {
     const response = await apiClient.get('/cabinet/admin/stats/nodes');
+    return response.data;
+  },
+
+  // Get devices online per location
+  getLocations: async (): Promise<LocationsOverview> => {
+    const response = await apiClient.get('/cabinet/admin/stats/locations');
     return response.data;
   },
 
